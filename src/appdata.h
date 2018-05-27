@@ -8,17 +8,16 @@ struct DLLInfo;
 
 struct DLLInfo
 {
-    HINSTANCE instance;
-    FARPROC   loop_func;
+    HINSTANCE instance  = nullptr;
+    FARPROC   loop_func = nullptr;
+    FILETIME  last_write_time;
+
+    u32 reload_count = 0;
 };
 
 struct Appdata
 {
-    ~Appdata()
-    {
-        cleanup_type_store( this->type_store );
-    }
-
     TypeStore type_store = {};
-    DLLInfo dll_info;
+    DLLInfo   dll_info = {};
+    bool      running = false;
 };

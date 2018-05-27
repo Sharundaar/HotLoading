@@ -58,6 +58,9 @@ void register_types( TypeInfo& (*alloc_type) ( void* ), void* alloc_type_param, 
     auto& type_HINSTANCE__ = alloc_type_short( TypeInfoType::Struct );
     auto& type_HINSTANCE = alloc_type_short( TypeInfoType::Typedef );
     auto& type_FARPROC = alloc_type_short( TypeInfoType::Typedef );
+    auto& type_DWORD = alloc_type_short( type_unsigned_long.type );
+    auto& type__FILETIME = alloc_type_short( TypeInfoType::Struct );
+    auto& type_FILETIME = alloc_type_short( TypeInfoType::Typedef );
     auto& type_DLLInfo = alloc_type_short( TypeInfoType::Struct );
     auto& type_Appdata = alloc_type_short( TypeInfoType::Struct );
 
@@ -303,48 +306,51 @@ void register_types( TypeInfo& (*alloc_type) ( void* ), void* alloc_type_param, 
     type_set_id( type_LocalTypeId, type_id<LocalTypeId>() );
     enum_set_underlying_type( type_LocalTypeId.enum_info, &type_uint32_t );
     {
-        auto values = (EnumValue*)alloc_data( alloc_data_param, sizeof(EnumValue) * 40 );
-        values[0] = { copy_string( "i64_id" ), 21 };
-        values[1] = { copy_string( "TypeStore_id" ), 33 };
-        values[2] = { copy_string( "DLLInfo_id" ), 37 };
-        values[3] = { copy_string( "HINSTANCE_id" ), 35 };
-        values[4] = { copy_string( "short_id" ), 3 };
-        values[5] = { copy_string( "u8_id" ), 22 };
-        values[6] = { copy_string( "u64_id" ), 25 };
-        values[7] = { copy_string( "Appdata_id" ), 38 };
-        values[8] = { copy_string( "unsigned_char_id" ), 10 };
-        values[9] = { copy_string( "ObjectTypeId_id" ), 32 };
-        values[10] = { copy_string( "uint_id" ), 14 };
-        values[11] = { copy_string( "i16_id" ), 19 };
-        values[12] = { copy_string( "u32_id" ), 24 };
-        values[13] = { copy_string( "std_string_id" ), 29 };
-        values[14] = { copy_string( "char_id" ), 1 };
-        values[15] = { copy_string( "f32_id" ), 26 };
-        values[16] = { copy_string( "HINSTANCE___id" ), 34 };
-        values[17] = { copy_string( "FARPROC_id" ), 36 };
-        values[18] = { copy_string( "ushort_id" ), 15 };
-        values[19] = { copy_string( "std_basic_string_id" ), 28 };
-        values[20] = { copy_string( "unsigned_int_id" ), 6 };
-        values[21] = { copy_string( "float_id" ), 12 };
-        values[22] = { copy_string( "signed_char_id" ), 11 };
-        values[23] = { copy_string( "i8_id" ), 18 };
-        values[24] = { copy_string( "double_id" ), 13 };
-        values[25] = { copy_string( "int_id" ), 2 };
-        values[26] = { copy_string( "COUNT" ), 39 };
-        values[27] = { copy_string( "i32_id" ), 20 };
-        values[28] = { copy_string( "LocalTypeId_id" ), 31 };
-        values[29] = { copy_string( "uint32_t_id" ), 30 };
-        values[30] = { copy_string( "long_long_id" ), 5 };
-        values[31] = { copy_string( "unsigned_long_id" ), 8 };
-        values[32] = { copy_string( "unsigned_long_long_id" ), 9 };
-        values[33] = { copy_string( "unsigned_short_id" ), 7 };
-        values[34] = { copy_string( "long_id" ), 4 };
-        values[35] = { copy_string( "ulong_id" ), 16 };
-        values[36] = { copy_string( "f64_id" ), 27 };
-        values[37] = { copy_string( "uchar_id" ), 17 };
-        values[38] = { copy_string( "u16_id" ), 23 };
-        values[39] = { copy_string( "bool_id" ), 0 };
-        enum_set_values( type_LocalTypeId.enum_info, values, 40 );
+        auto values = (EnumValue*)alloc_data( alloc_data_param, sizeof(EnumValue) * 43 );
+        values[0] = { copy_string( "TypeStore_id" ), 33 };
+        values[1] = { copy_string( "char_id" ), 1 };
+        values[2] = { copy_string( "int_id" ), 2 };
+        values[3] = { copy_string( "DLLInfo_id" ), 40 };
+        values[4] = { copy_string( "uint32_t_id" ), 30 };
+        values[5] = { copy_string( "long_id" ), 4 };
+        values[6] = { copy_string( "unsigned_long_id" ), 8 };
+        values[7] = { copy_string( "ushort_id" ), 15 };
+        values[8] = { copy_string( "double_id" ), 13 };
+        values[9] = { copy_string( "u64_id" ), 25 };
+        values[10] = { copy_string( "FARPROC_id" ), 36 };
+        values[11] = { copy_string( "u8_id" ), 22 };
+        values[12] = { copy_string( "bool_id" ), 0 };
+        values[13] = { copy_string( "uchar_id" ), 17 };
+        values[14] = { copy_string( "std_basic_string_id" ), 28 };
+        values[15] = { copy_string( "i16_id" ), 19 };
+        values[16] = { copy_string( "f64_id" ), 27 };
+        values[17] = { copy_string( "u32_id" ), 24 };
+        values[18] = { copy_string( "u16_id" ), 23 };
+        values[19] = { copy_string( "short_id" ), 3 };
+        values[20] = { copy_string( "unsigned_long_long_id" ), 9 };
+        values[21] = { copy_string( "i8_id" ), 18 };
+        values[22] = { copy_string( "float_id" ), 12 };
+        values[23] = { copy_string( "i64_id" ), 21 };
+        values[24] = { copy_string( "DWORD_id" ), 37 };
+        values[25] = { copy_string( "HINSTANCE___id" ), 34 };
+        values[26] = { copy_string( "Appdata_id" ), 41 };
+        values[27] = { copy_string( "f32_id" ), 26 };
+        values[28] = { copy_string( "HINSTANCE_id" ), 35 };
+        values[29] = { copy_string( "signed_char_id" ), 11 };
+        values[30] = { copy_string( "i32_id" ), 20 };
+        values[31] = { copy_string( "std_string_id" ), 29 };
+        values[32] = { copy_string( "long_long_id" ), 5 };
+        values[33] = { copy_string( "LocalTypeId_id" ), 31 };
+        values[34] = { copy_string( "unsigned_char_id" ), 10 };
+        values[35] = { copy_string( "unsigned_int_id" ), 6 };
+        values[36] = { copy_string( "FILETIME_id" ), 39 };
+        values[37] = { copy_string( "unsigned_short_id" ), 7 };
+        values[38] = { copy_string( "uint_id" ), 14 };
+        values[39] = { copy_string( "ulong_id" ), 16 };
+        values[40] = { copy_string( "ObjectTypeId_id" ), 32 };
+        values[41] = { copy_string( "_FILETIME_id" ), 38 };
+        values[42] = { copy_string( "COUNT" ), 42 };
+        enum_set_values( type_LocalTypeId.enum_info, values, 43 );
     }
 
     type_set_name( type_ObjectTypeId, copy_string( "ObjectTypeId" ) );
@@ -387,31 +393,6 @@ void register_types( TypeInfo& (*alloc_type) ( void* ), void* alloc_type_param, 
     field_set_modifiers( type_TypeStore_fields[4], (FieldInfoModifier) (FieldInfoModifier::NONE) );
     struct_set_fields( type_TypeStore, type_TypeStore_fields, 5 );
 
-    {
-        auto& type_init_type_store = *((TypeInfo*)alloc_data( alloc_data_param, sizeof( TypeInfo ) ));
-        type_set_type( type_init_type_store, TypeInfoType::Function );
-        type_init_type_store = {};
-        type_set_name( type_init_type_store, copy_string( "init_type_store" ) );
-        FieldInfo type_init_type_store_return_type;
-        field_set_modifiers( type_init_type_store_return_type, (FieldInfoModifier) (FieldInfoModifier::NONE) );
-        field_set_type( type_init_type_store_return_type, &type_TypeStore );
-        func_set_return_type( type_init_type_store, type_init_type_store_return_type );
-    }
-
-    {
-        auto& type_cleanup_type_store = *((TypeInfo*)alloc_data( alloc_data_param, sizeof( TypeInfo ) ));
-        type_set_type( type_cleanup_type_store, TypeInfoType::Function );
-        type_cleanup_type_store = {};
-        type_set_name( type_cleanup_type_store, copy_string( "cleanup_type_store" ) );
-        auto* type_cleanup_type_store_params = (FieldInfo*)alloc_data( alloc_data_param, sizeof(FieldInfo) * 1 );
-        {
-            field_set_name( type_cleanup_type_store_params[0], copy_string( "store" ) );
-            field_set_modifiers( type_cleanup_type_store_params[0], (FieldInfoModifier) (FieldInfoModifier::REFERENCE) );
-            field_set_type( type_cleanup_type_store_params[0], &type_TypeStore );
-        }
-        func_set_parameters( type_cleanup_type_store, type_cleanup_type_store_params, 1 );
-    }
-
     type_set_name( type_HINSTANCE__, copy_string( "HINSTANCE__" ) );
     type_set_id( type_HINSTANCE__, type_id<HINSTANCE__>() );
     struct_set_size( type_HINSTANCE__, sizeof( HINSTANCE__ ) );
@@ -429,10 +410,33 @@ void register_types( TypeInfo& (*alloc_type) ( void* ), void* alloc_type_param, 
     type_set_id( type_FARPROC, { 0, (uint32_t)LocalTypeId::FARPROC_id } );
     field_set_modifiers( type_FARPROC.typedef_info.info, (FieldInfoModifier) (FieldInfoModifier::POINTER) );
 
+    type_DWORD = type_unsigned_long;
+    type_set_name( type_DWORD, copy_string( "DWORD" ) );
+    type_set_id( type_DWORD, { 0, (uint32_t)LocalTypeId::DWORD_id } );
+
+    type_set_name( type__FILETIME, copy_string( "_FILETIME" ) );
+    type_set_id( type__FILETIME, type_id<_FILETIME>() );
+    struct_set_size( type__FILETIME, sizeof( _FILETIME ) );
+    auto type__FILETIME_fields = (FieldInfo*)alloc_data( alloc_data_param, sizeof(FieldInfo) * 2 );
+    field_set_name( type__FILETIME_fields[0], copy_string( "dwLowDateTime" ) );
+    field_set_modifiers( type__FILETIME_fields[0], (FieldInfoModifier) (FieldInfoModifier::NONE) );
+    field_set_type( type__FILETIME_fields[0], &type_DWORD );
+    field_set_name( type__FILETIME_fields[1], copy_string( "dwHighDateTime" ) );
+    field_set_offset( type__FILETIME_fields[1], 4 );
+    field_set_modifiers( type__FILETIME_fields[1], (FieldInfoModifier) (FieldInfoModifier::NONE) );
+    field_set_type( type__FILETIME_fields[1], &type_DWORD );
+    struct_set_fields( type__FILETIME, type__FILETIME_fields, 2 );
+
+    type_set_name( type_FILETIME, copy_string( "FILETIME" ) );
+    type_set_id( type_FILETIME, { 0, (uint32_t)LocalTypeId::FILETIME_id } );
+    field_set_name( type_FILETIME.typedef_info.info, copy_string( "_FILETIME" ) );
+    field_set_modifiers( type_FILETIME.typedef_info.info, (FieldInfoModifier) (FieldInfoModifier::NONE) );
+    field_set_type( type_FILETIME.typedef_info.info, &type__FILETIME );
+
     type_set_name( type_DLLInfo, copy_string( "DLLInfo" ) );
     type_set_id( type_DLLInfo, type_id<DLLInfo>() );
     struct_set_size( type_DLLInfo, sizeof( DLLInfo ) );
-    auto type_DLLInfo_fields = (FieldInfo*)alloc_data( alloc_data_param, sizeof(FieldInfo) * 2 );
+    auto type_DLLInfo_fields = (FieldInfo*)alloc_data( alloc_data_param, sizeof(FieldInfo) * 4 );
     field_set_name( type_DLLInfo_fields[0], copy_string( "instance" ) );
     field_set_modifiers( type_DLLInfo_fields[0], (FieldInfoModifier) (FieldInfoModifier::NONE) );
     field_set_type( type_DLLInfo_fields[0], &type_HINSTANCE );
@@ -440,19 +444,30 @@ void register_types( TypeInfo& (*alloc_type) ( void* ), void* alloc_type_param, 
     field_set_offset( type_DLLInfo_fields[1], 8 );
     field_set_modifiers( type_DLLInfo_fields[1], (FieldInfoModifier) (FieldInfoModifier::NONE) );
     field_set_type( type_DLLInfo_fields[1], &type_FARPROC );
-    struct_set_fields( type_DLLInfo, type_DLLInfo_fields, 2 );
+    field_set_name( type_DLLInfo_fields[2], copy_string( "last_write_time" ) );
+    field_set_offset( type_DLLInfo_fields[2], 16 );
+    field_set_modifiers( type_DLLInfo_fields[2], (FieldInfoModifier) (FieldInfoModifier::NONE) );
+    field_set_type( type_DLLInfo_fields[2], &type_FILETIME );
+    field_set_name( type_DLLInfo_fields[3], copy_string( "reload_count" ) );
+    field_set_offset( type_DLLInfo_fields[3], 24 );
+    field_set_modifiers( type_DLLInfo_fields[3], (FieldInfoModifier) (FieldInfoModifier::NONE) );
+    field_set_type( type_DLLInfo_fields[3], &type_u32 );
+    struct_set_fields( type_DLLInfo, type_DLLInfo_fields, 4 );
 
     type_set_name( type_Appdata, copy_string( "Appdata" ) );
     type_set_id( type_Appdata, type_id<Appdata>() );
     struct_set_size( type_Appdata, sizeof( Appdata ) );
-    auto type_Appdata_fields = (FieldInfo*)alloc_data( alloc_data_param, sizeof(FieldInfo) * 2 );
+    auto type_Appdata_fields = (FieldInfo*)alloc_data( alloc_data_param, sizeof(FieldInfo) * 3 );
     field_set_name( type_Appdata_fields[0], copy_string( "type_store" ) );
     field_set_modifiers( type_Appdata_fields[0], (FieldInfoModifier) (FieldInfoModifier::NONE) );
     field_set_type( type_Appdata_fields[0], &type_TypeStore );
     field_set_name( type_Appdata_fields[1], copy_string( "dll_info" ) );
     field_set_modifiers( type_Appdata_fields[1], (FieldInfoModifier) (FieldInfoModifier::NONE) );
     field_set_type( type_Appdata_fields[1], &type_DLLInfo );
-    struct_set_fields( type_Appdata, type_Appdata_fields, 2 );
+    field_set_name( type_Appdata_fields[2], copy_string( "running" ) );
+    field_set_modifiers( type_Appdata_fields[2], (FieldInfoModifier) (FieldInfoModifier::NONE) );
+    field_set_type( type_Appdata_fields[2], &type_bool );
+    struct_set_fields( type_Appdata, type_Appdata_fields, 3 );
 
 }
 

@@ -11,8 +11,7 @@ include_directories(
 set(LIBRARY_OUTPUT_PATH ../bin)
 set(EXECUTABLE_OUTPUT_PATH ../bin)
 
-set( COMMONSRC src/store.cpp
-               src/basics.cpp )
+set( COMMONSRC src/basics.cpp )
 
 set( LIBSRC ${COMMONSRC}
             src/dll.cpp

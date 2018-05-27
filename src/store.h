@@ -12,6 +12,3 @@ struct TypeStore
     u32 type_count      = 0;
     const TypeInfo* all_types[(u32)LocalTypeId::COUNT] = { nullptr };
 };
-
-TypeStore init_type_store();
-void cleanup_type_store( TypeStore& store );

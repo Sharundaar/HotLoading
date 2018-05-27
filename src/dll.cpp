@@ -22,18 +22,23 @@ DLLEXPORT Appdata& get_dll_appdata()
         return s_default_appdata;
 }
 
-DLLEXPORT void loop()
+DLLEXPORT void loop( Appdata& appdata )
 {
-    println("Hello, world from dll.");
+    println("DLL reload count: %", appdata.dll_info.reload_count);
+
+    // doing some computation...
+    int i = 0;
+    i++;
+    i *= 5;
 }
 
-TypeStore init_type_store()
+TypeStore get_dll_types()
 {
     TypeStore store = {};
 
     u32 capacity = 0x7000;
-    store.buffer = new u8[0x5000];
-    store.buffer_capacity = 0x5000;
+    store.buffer = new u8[capacity];
+    store.buffer_capacity = capacity;
 
     auto alloc_type = []( void* param ) -> TypeInfo& {
         auto store = (TypeStore*)param;

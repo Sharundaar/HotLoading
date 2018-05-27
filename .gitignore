@@ -12,3 +12,5 @@ CTestTestfile.cmake
 # Repo stuff
 build/
 bin/
+
+settings.json

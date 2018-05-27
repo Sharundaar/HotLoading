@@ -1,8 +1,8 @@
 #pragma once
 #include "types.h"
 
-#include <windows.h>
 #include <stdint.h>
+#include <windows.h>
 #include <string>
 
 void register_types( TypeInfo& (*alloc_type) ( void* ), void* alloc_type_param, void* (*alloc_data) ( void*, uint32_t ), void* alloc_data_param );
@@ -12,6 +12,7 @@ enum class ObjectTypeId : int;
 
 struct TypeStore;
 struct HINSTANCE__;
+struct _FILETIME;
 struct DLLInfo;
 struct Appdata;
 
@@ -54,6 +55,9 @@ enum class LocalTypeId : uint32_t
     HINSTANCE___id,
     HINSTANCE_id,
     FARPROC_id,
+    DWORD_id,
+    _FILETIME_id,
+    FILETIME_id,
     DLLInfo_id,
     Appdata_id,
     COUNT,
@@ -117,6 +121,9 @@ constexpr TypeId type_id(const TypeStore& obj) { return type_id<TypeStore>(); }
 
 template<> constexpr TypeId type_id<HINSTANCE__>() { return { 0, (uint32_t)LocalTypeId::HINSTANCE___id }; }
 constexpr TypeId type_id(const HINSTANCE__& obj) { return type_id<HINSTANCE__>(); }
+
+template<> constexpr TypeId type_id<_FILETIME>() { return { 0, (uint32_t)LocalTypeId::_FILETIME_id }; }
+constexpr TypeId type_id(const _FILETIME& obj) { return type_id<_FILETIME>(); }
 
 template<> constexpr TypeId type_id<DLLInfo>() { return { 0, (uint32_t)LocalTypeId::DLLInfo_id }; }
 constexpr TypeId type_id(const DLLInfo& obj) { return type_id<DLLInfo>(); }
