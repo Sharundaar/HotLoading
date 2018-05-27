@@ -4,35 +4,64 @@
 #include "basics.h"
 #include "store.h"
 
+struct RAIIHandle
+{
+    ~RAIIHandle() { if( handle ) CloseHandle( handle ); }
+    HANDLE handle = NULL;
+
+    operator bool() { return handle != NULL; }
+    operator HANDLE() { return handle; }
+};
+
 bool dll_need_reload( Appdata& appdata )
 {
     if( appdata.dll_info.instance == nullptr )
         return true;
 
-    HANDLE dll_handle = CreateFile( 
-        "HotLoadingDLL.dll",
-        GENERIC_READ,
-        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        NULL,
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL
-    );
+    FILETIME last_dll_write_time;
+    FILETIME last_pdb_write_time;
 
-    if( dll_handle == nullptr)
+    {
+        RAIIHandle dll_handle = { CreateFile( 
+            "HotLoadingDLL.dll",
+            GENERIC_READ,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL
+        ) };
+
+        if( !dll_handle )
+            return false;
+
+        RAIIHandle pdb_handle = { CreateFile( 
+            "HotLoadingDLL.pdb",
+            GENERIC_READ,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL
+        ) };
+
+        if( !pdb_handle )
+            return false;
+
+        if( GetFileTime( dll_handle, nullptr, nullptr, &last_dll_write_time ) == 0 )
+            return false;
+        if( GetFileTime( pdb_handle, nullptr, nullptr, &last_pdb_write_time ) == 0 )
+            return false;
+    }
+
+    if( CompareFileTime( &appdata.dll_info.last_dll_write_time, &last_dll_write_time ) >= 0 )
         return false;
 
-    FILETIME last_write_time;
-    if( GetFileTime( dll_handle, nullptr, nullptr, &last_write_time ) == 0 )
-        return false;
-
-    CloseHandle( dll_handle );
-    dll_handle = nullptr;
-
-    if( CompareFileTime( &appdata.dll_info.last_write_time, &last_write_time ) >= 0 )
+    if( CompareFileTime( &appdata.dll_info.last_pdb_write_time, &last_pdb_write_time ) >= 0 )
         return false;
     
-    appdata.dll_info.last_write_time = last_write_time;
+    appdata.dll_info.last_dll_write_time = last_dll_write_time;
+    appdata.dll_info.last_pdb_write_time = last_pdb_write_time;
 
     return true;
 }

@@ -24,12 +24,7 @@ DLLEXPORT Appdata& get_dll_appdata()
 
 DLLEXPORT void loop( Appdata& appdata )
 {
-    println("DLL reload count: %", appdata.dll_info.reload_count);
-
-    // doing some computation...
-    int i = 0;
-    i++;
-    i *= 5;
+    println("DLL blablabla reload count: %", appdata.dll_info.reload_count);
 }
 
 TypeStore get_dll_types()

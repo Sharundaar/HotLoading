@@ -10,7 +10,8 @@ struct DLLInfo
 {
     HINSTANCE instance  = nullptr;
     FARPROC   loop_func = nullptr;
-    FILETIME  last_write_time;
+    FILETIME  last_dll_write_time;
+    FILETIME  last_pdb_write_time;
 
     u32 reload_count = 0;
 };

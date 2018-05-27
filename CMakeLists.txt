@@ -20,5 +20,7 @@ set( LIBSRC ${COMMONSRC}
 set( SRC ${COMMONSRC}
          src/main.cpp )
 
+set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /PDBALTPATH:HotLoadingDLL_loaded.pdb")
+
 add_library( HotLoadingDLL SHARED ${LIBSRC} )
 add_executable( HotLoading ${SRC} )
