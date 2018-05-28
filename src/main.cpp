@@ -1,8 +1,79 @@
+#include <string>
+
 #include <windows.h>
+
+#include <SDL.h>
+#include <GLAD/glad.h>
 
 #include "appdata.h"
 #include "basics.h"
 #include "store.h"
+
+static void setup_opengl_attributes()
+{
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+
+    SDL_GL_SetAttribute( SDL_GL_RED_SIZE,      8 );
+    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE,     8 );
+    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE,    8 );
+    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE,   16 );
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER,  1 );
+}
+
+static void setup_opengl_context( Appdata& appdata )
+{
+    appdata.sdl_info.opengl_context = SDL_GL_CreateContext( appdata.sdl_info.window );
+    SDL_GL_SetSwapInterval( 0 );
+
+    // init GLAD AFTER the GL Context
+    print("Initialing GLAD...");
+    if( !gladLoadGLLoader( &SDL_GL_GetProcAddress ) )
+        assert(false, "Failed to load GL functions with GLAD.");
+    println(" done.");
+
+    println("Vendor: %",   (const char*) glGetString(GL_VENDOR));
+    println("Renderer: %", (const char*) glGetString(GL_RENDERER));
+    println("Version: %",  (const char*) glGetString(GL_VERSION));
+
+    glViewport( 0, 0, (int) appdata.sdl_info.width, (int) appdata.sdl_info.height );
+    glEnable( GL_DEPTH_TEST );
+}
+
+static void create_sdl_window( Appdata& appdata )
+{
+    std::string title = "Hello, World!";
+    appdata.sdl_info.height = 1600;
+    appdata.sdl_info.width = 900;
+
+    appdata.sdl_info.window = SDL_CreateWindow( title.c_str(), 
+                    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                    (int)appdata.sdl_info.width, (int)appdata.sdl_info.height,
+                    SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN );
+
+    assert( appdata.sdl_info.window != nullptr, "Failed to create the window.");
+}
+
+void init_graphics( Appdata& appdata )
+{
+    // init SDL
+    print("Initializing SDL...");
+    assert(SDL_Init(SDL_INIT_EVERYTHING) >= 0, format("Failed to init the sdl: %", SDL_GetError()));
+    println(" done.");
+
+    setup_opengl_attributes();
+    
+    create_sdl_window( appdata );
+
+    setup_opengl_context( appdata );
+}
+
+void cleanup_graphics( Appdata& appdata )
+{
+    SDL_GL_DeleteContext( appdata.sdl_info.opengl_context );
+    SDL_DestroyWindow( appdata.sdl_info.window );
+}
 
 struct RAIIHandle
 {
@@ -96,6 +167,8 @@ int main(int, char**)
 {
     Appdata appdata;
 
+    init_graphics( appdata );
+
     appdata.running = true;
     while( appdata.running )
     {
@@ -103,5 +176,6 @@ int main(int, char**)
         reinterpret_cast< void(*)() >( appdata.dll_info.loop_func )();
     }
 
+    cleanup_graphics( appdata );
     return 0;
 }

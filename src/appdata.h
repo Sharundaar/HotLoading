@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL.h>
 #include <windows.h>
 #include "store.h"
 
@@ -18,9 +19,19 @@ struct DLLInfo
     u32 reload_count = 0;
 };
 
+struct SDLInfo
+{
+    SDL_Window* window = nullptr;
+    SDL_GLContext opengl_context = nullptr;
+    float width  = 0;
+    float height = 0;
+};
+
 struct Appdata
 {
     TypeStore type_store = {};
     DLLInfo   dll_info = {};
+    SDLInfo   sdl_info = {};
+
     bool      running = false;
 };
