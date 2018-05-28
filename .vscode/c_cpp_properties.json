@@ -6,14 +6,18 @@
                 "path": [
                     "${workspaceRoot}/generated",
                     "${workspaceRoot}/src",
-                    "${EXTERNALS}/GenMetadata/include"
+                    "${EXTERNALS}/GenMetadata/include",
+                    "${EXTERNALS}/GLAD/include",
+                    "${EXTERNALS}/SDL2-2.0.5/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
                 "${workspaceRoot}/generated",
                 "${workspaceRoot}/src",
-                "${EXTERNALS}/GenMetadata/include"
+                "${EXTERNALS}/GenMetadata/include",
+                "${EXTERNALS}/GLAD/include",
+                "${EXTERNALS}/SDL2-2.0.5/include"
             ],
             "defines": [
                 "_DEBUG",
