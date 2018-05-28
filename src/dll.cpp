@@ -6,15 +6,17 @@
 #include "types.h"
 #undef TYPES_IMPLEMENTATION
 
+#include "type_db.h"
+
 Appdata  s_default_appdata = {};
 Appdata* s_appdata = nullptr;
 
-DLLEXPORT void set_dll_appdata( Appdata* appdata )
+void set_dll_appdata( Appdata* appdata )
 {
     s_appdata = appdata;
 }
 
-DLLEXPORT Appdata& get_dll_appdata()
+Appdata& get_dll_appdata()
 {
     if( s_appdata )
         return *s_appdata;
@@ -22,9 +24,10 @@ DLLEXPORT Appdata& get_dll_appdata()
         return s_default_appdata;
 }
 
-DLLEXPORT void loop( Appdata& appdata )
+void loop( )
 {
-    println("DLL blablabla reload count: %", appdata.dll_info.reload_count);
+    auto& appdata = get_dll_appdata();
+    println( "Hello from DLL ! Reloaded % times.", appdata.dll_info.reload_count );
 }
 
 TypeStore get_dll_types()
@@ -54,6 +57,7 @@ TypeStore get_dll_types()
 
     register_types( alloc_type, &store, alloc_data, &store );
 
+    store.all_types = new const TypeInfo*[(u32)LocalTypeId::COUNT];
     for(u32 idx = 0; idx < store.type_count; ++idx)
     {
         auto type = (TypeInfo*) (store.buffer+(idx*sizeof(TypeInfo)));
