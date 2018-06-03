@@ -11,6 +11,7 @@ extern "C"
     DLLEXPORT TypeStore get_dll_types();
 
     DLLEXPORT void loop();
+    DLLEXPORT void reload();
 }
 
 Appdata& get_dll_appdata();

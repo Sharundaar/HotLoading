@@ -32,6 +32,11 @@ set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /PDBALTP
 add_library(HotLoadingDLL SHARED ${LIBSRC})
 add_executable(HotLoading ${EXECSRC})
 
+target_link_libraries(HotLoadingDLL
+                        ${OPENGL}/opengl32.lib
+                        ${SDL2}/lib/x64/SDL2main.lib
+                        ${SDL2}/lib/x64/SDL2.lib )
+
 target_link_libraries(HotLoading
                         ${OPENGL}/opengl32.lib
                         ${SDL2}/lib/x64/SDL2main.lib

@@ -29,8 +29,7 @@ static void setup_opengl_context( Appdata& appdata )
 
     // init GLAD AFTER the GL Context
     print("Initialing GLAD...");
-    if( !gladLoadGLLoader( &SDL_GL_GetProcAddress ) )
-        assert(false, "Failed to load GL functions with GLAD.");
+    assert(gladLoadGLLoader( &SDL_GL_GetProcAddress ), "Failed to load GL functions with GLAD.");
     println(" done.");
 
     println("Vendor: %",   (const char*) glGetString(GL_VENDOR));
@@ -44,8 +43,8 @@ static void setup_opengl_context( Appdata& appdata )
 static void create_sdl_window( Appdata& appdata )
 {
     std::string title = "Hello, World!";
-    appdata.sdl_info.height = 1600;
-    appdata.sdl_info.width = 900;
+    appdata.sdl_info.width = 1600;
+    appdata.sdl_info.height = 900;
 
     appdata.sdl_info.window = SDL_CreateWindow( title.c_str(), 
                     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
@@ -158,9 +157,13 @@ void reload_dll( Appdata& appdata )
     appdata.dll_info.set_dll_appdata_func = GetProcAddress( appdata.dll_info.instance, "set_dll_appdata" );
     assert( appdata.dll_info.set_dll_appdata_func != nullptr, "Failed to load set_dll_appdata function." );
 
+    appdata.dll_info.reload_func = GetProcAddress( appdata.dll_info.instance, "reload" );
+    assert( appdata.dll_info.reload_func != nullptr, "Failed to load reload function." );
+
     appdata.dll_info.reload_count++;
 
     reinterpret_cast< void(*)( Appdata* appdata ) >( appdata.dll_info.set_dll_appdata_func )( &appdata );
+    reinterpret_cast< void(*)() >( appdata.dll_info.reload_func )();
 }
 
 int main(int, char**)

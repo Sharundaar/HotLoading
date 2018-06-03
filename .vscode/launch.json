@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Metadata",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "../GenMetadata/target/debug/gen-metadata.exe",
+            "args": [ "src", "../Externals/GenMetadata/include","-i","generated","-i","../Externals/SDL2-2.0.5/include","-i","../Externals/GLAD/include", "--output","generated" ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
