@@ -29,9 +29,9 @@ Appdata& get_dll_appdata()
 
 static void setup_opengl_attributes()
 {
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 5 );
 
     SDL_GL_SetAttribute( SDL_GL_RED_SIZE,      8 );
     SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE,     8 );
@@ -58,13 +58,101 @@ static void setup_opengl_context( Appdata& appdata )
     glEnable( GL_DEPTH_TEST );
 }
 
-void reload()
+static void create_sdl_window( Appdata& appdata )
 {
-    setup_opengl_attributes();
-    setup_opengl_context( get_dll_appdata() );
+    std::string title = "Hello, World!";
+    appdata.sdl_info.width = 1600;
+    appdata.sdl_info.height = 900;
+
+    appdata.sdl_info.window = SDL_CreateWindow( title.c_str(), 
+                    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                    (int)appdata.sdl_info.width, (int)appdata.sdl_info.height,
+                    SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN );
+
+    assert( appdata.sdl_info.window != nullptr, "Failed to create the window.");
 }
 
-void loop( )
+static void init_graphics( Appdata& appdata )
+{
+    // init SDL
+    print("Initializing SDL...");
+    assert(SDL_Init(SDL_INIT_EVERYTHING) >= 0, format("Failed to init the sdl: %", SDL_GetError()));
+    println(" done.");
+
+    setup_opengl_attributes();
+    create_sdl_window( appdata );
+    setup_opengl_context( appdata );
+}
+
+void reload_dll()
+{
+    println( "[INFO]: DLL reloaded." );
+    auto& appdata = get_dll_appdata();
+    if( !appdata.sdl_info.window )
+        init_graphics( appdata );
+    else
+        assert(gladLoadGLLoader( &SDL_GL_GetProcAddress ), "Failed to load GL functions with GLAD.");
+}
+
+void unload_dll( bool last_time )
+{
+    auto& appdata = get_dll_appdata();
+
+    if( last_time && appdata.sdl_info.window )
+    {
+        SDL_GL_DeleteContext( appdata.sdl_info.opengl_context );
+        SDL_DestroyWindow( appdata.sdl_info.window );
+        appdata.sdl_info.window = nullptr;
+    }
+
+    println( "[INFO]: DLL unloaded." );
+}
+
+/*
+     // Application init
+     ImGui::CreateContext();
+     ImGuiIO& io = ImGui::GetIO();
+     io.DisplaySize.x = 1920.0f;
+     io.DisplaySize.y = 1280.0f;
+     // TODO: Fill others settings of the io structure later.
+
+     // Load texture atlas (there is a default font so you don't need to care about choosing a font yet)
+     unsigned char* pixels;
+     int width, height;
+     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+     // TODO: At this points you've got the texture data and you need to upload that your your graphic system:
+     MyTexture* texture = MyEngine::CreateTextureFromMemoryPixels(pixels, width, height, TEXTURE_TYPE_RGBA)
+     // TODO: Store your texture pointer/identifier (whatever your engine uses) in 'io.Fonts->TexID'. This will be passed back to your via the renderer.
+     io.Fonts->TexID = (void*)texture;
+
+     // Application main loop
+     while (true)
+     {
+        // Setup low-level inputs (e.g. on Win32, GetKeyboardState(), or write to those fields from your Windows message loop handlers, etc.)
+        ImGuiIO& io = ImGui::GetIO();
+        io.DeltaTime = 1.0f/60.0f;
+        io.MousePos = mouse_pos;
+        io.MouseDown[0] = mouse_button_0;
+        io.MouseDown[1] = mouse_button_1;
+
+        // Call NewFrame(), after this point you can use ImGui::* functions anytime
+        ImGui::NewFrame();
+
+        // Most of your application code here
+        MyGameUpdate(); // may use any ImGui functions, e.g. ImGui::Begin("My window"); ImGui::Text("Hello, world!"); ImGui::End();
+        MyGameRender(); // may use any ImGui functions as well!
+
+        // Render & swap video buffers
+        ImGui::Render();
+        MyImGuiRenderFunction(ImGui::GetDrawData());
+        SwapBuffers();
+     }
+
+     // Shutdown
+     ImGui::DestroyContext();
+*/
+
+void loop_dll( )
 {
     auto& appdata = get_dll_appdata();
 

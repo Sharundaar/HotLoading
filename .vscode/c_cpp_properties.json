@@ -8,7 +8,8 @@
                     "${workspaceRoot}/src",
                     "${EXTERNALS}/GenMetadata/include",
                     "${EXTERNALS}/GLAD/include",
-                    "${EXTERNALS}/SDL2-2.0.5/include"
+                    "${EXTERNALS}/SDL2-2.0.5/include",
+                    "${EXTERNALS}/IMGUI"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
@@ -17,7 +18,8 @@
                 "${workspaceRoot}/src",
                 "${EXTERNALS}/GenMetadata/include",
                 "${EXTERNALS}/GLAD/include",
-                "${EXTERNALS}/SDL2-2.0.5/include"
+                "${EXTERNALS}/SDL2-2.0.5/include",
+                "${EXTERNALS}/IMGUI"
             ],
             "defines": [
                 "_DEBUG",
