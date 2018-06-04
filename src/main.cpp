@@ -17,9 +17,6 @@ struct RAIIHandle
 
 bool dll_need_reload( Appdata& appdata )
 {
-    if( appdata.dll_info.instance == nullptr )
-        return true;
-
     FILETIME last_dll_write_time;
     FILETIME last_pdb_write_time;
 
@@ -56,11 +53,14 @@ bool dll_need_reload( Appdata& appdata )
             return false;
     }
 
-    if( CompareFileTime( &appdata.dll_info.last_dll_write_time, &last_dll_write_time ) >= 0 )
-        return false;
+    if( appdata.dll_info.instance != nullptr )
+    {
+        if( CompareFileTime( &appdata.dll_info.last_dll_write_time, &last_dll_write_time ) >= 0 )
+            return false;
 
-    if( CompareFileTime( &appdata.dll_info.last_pdb_write_time, &last_pdb_write_time ) >= 0 )
-        return false;
+        if( CompareFileTime( &appdata.dll_info.last_pdb_write_time, &last_pdb_write_time ) >= 0 )
+            return false;
+    }
     
     appdata.dll_info.last_dll_write_time = last_dll_write_time;
     appdata.dll_info.last_pdb_write_time = last_pdb_write_time;

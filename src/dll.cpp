@@ -84,6 +84,56 @@ static void init_graphics( Appdata& appdata )
     setup_opengl_context( appdata );
 }
 
+static void reload_metadata( Appdata& appdata )
+{
+    auto previous_allocator = appdata.metadata.current_allocator;
+
+    if( appdata.metadata.current_allocator == nullptr ) 
+        appdata.metadata.current_allocator = &appdata.metadata.allocator1;
+    else
+        appdata.metadata.current_allocator = appdata.metadata.current_allocator == &appdata.metadata.allocator1 ? &appdata.metadata.allocator2 : &appdata.metadata.allocator1;
+
+    auto current_allocator = appdata.metadata.current_allocator;
+
+    current_allocator->type_size = 0;
+    current_allocator->data_size = 0;
+
+    if( current_allocator->type_capacity == 0 )
+    {
+        const size_t capacity = 0x5000; // @TODO: Allocate according to generated information
+        current_allocator->type_buffer   = new uint8_t[capacity];
+        current_allocator->type_capacity = capacity; 
+    }
+
+    if( current_allocator->data_capacity == 0 )
+    {
+        const size_t capacity = 0x5000; // @TODO: Allocate according to generated information
+        current_allocator->data_buffer   = new uint8_t[capacity];
+        current_allocator->data_capacity = capacity; 
+    }
+
+    register_types( default_type_allocator, current_allocator, default_data_allocator, current_allocator );
+
+    appdata.metadata.type_infos.clear();
+    appdata.metadata.type_infos.resize( (size_t)LocalTypeId::COUNT );
+    const auto* type_array = (TypeInfo*) current_allocator->type_buffer;
+    for( u32 type_idx=0; type_idx < (u32)LocalTypeId::COUNT; ++type_idx)
+    {
+        auto type = &type_array[type_idx];
+        if( type->type_id.local_type != INVALID_TYPE_ID )
+            appdata.metadata.type_infos[type->type_id.local_type] = type;
+    }
+}
+
+static void report_types( Appdata& appdata )
+{
+    println( "Declared types:" );
+    for( auto type: appdata.metadata.type_infos )
+    {
+        println( "    %", type->name );
+    }
+}
+
 void reload_dll()
 {
     println( "[INFO]: DLL reloaded." );
@@ -92,6 +142,9 @@ void reload_dll()
         init_graphics( appdata );
     else
         assert(gladLoadGLLoader( &SDL_GL_GetProcAddress ), "Failed to load GL functions with GLAD.");
+
+    reload_metadata( appdata );
+    report_types( appdata );
 }
 
 void unload_dll( bool last_time )
@@ -161,6 +214,15 @@ void loop_dll( )
     {
         switch( evt.type )
         {
+            case SDL_KEYDOWN:
+            {
+                switch( evt.key.keysym.sym )
+                {
+                    case SDLK_ESCAPE:
+                        appdata.running = false;
+                        break;
+                }
+            }
             case SDL_QUIT:
                 appdata.running = false;
                 break;

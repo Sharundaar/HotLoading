@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <windows.h>
+#include <vector>
 #include "store.h"
 
 struct Appdata;
@@ -30,11 +31,22 @@ struct SDLInfo
     float height = 0;
 };
 
+struct Metadata
+{
+    TypeDefaultAllocator allocator1 = {};
+    TypeDefaultAllocator allocator2 = {};
+
+    TypeDefaultAllocator* current_allocator = nullptr;
+
+    std::vector<const TypeInfo*> type_infos = {};
+};
+
 struct Appdata
 {
     TypeStore type_store = {};
     DLLInfo   dll_info = {};
     SDLInfo   sdl_info = {};
+    Metadata  metadata = {};
 
     bool      running = false;
 };
