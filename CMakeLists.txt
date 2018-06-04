@@ -24,11 +24,13 @@ set(GLAD_SRC ${GLAD}/src/glad.c)
 set(IMGUI_SRC ${IMGUI}/imgui.cpp
               ${IMGUI}/imgui_demo.cpp
               ${IMGUI}/imgui_draw.cpp)
-set(COMMONSRC ${IMGUI_SRC} ${GLAD_SRC} src/basics.cpp)
+set(COMMONSRC src/basics.cpp)
 
 set(LIBSRC ${COMMONSRC}
+            ${IMGUI_SRC} 
+            ${GLAD_SRC}
             src/dll.cpp
-            generated/type_db.cpp)
+            generated/type_db.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )
@@ -44,6 +46,5 @@ target_link_libraries(HotLoadingDLL
                         ${SDL2}/lib/x64/SDL2.lib )
 
 target_link_libraries(HotLoading
-                        ${OPENGL}/opengl32.lib
                         ${SDL2}/lib/x64/SDL2main.lib
                         ${SDL2}/lib/x64/SDL2.lib )

@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <glad/glad.h>
+#include <imgui.h>
 
 #include "dll.h"
 
@@ -134,14 +135,37 @@ static void report_types( Appdata& appdata )
     }
 }
 
+static void init_imgui( Appdata& appdata )
+{
+    ImGui::CreateContext();
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize.x = appdata.sdl_info.width;
+    io.DisplaySize.y = appdata.sdl_info.height;
+
+    uchar* pixels;
+    int width, height;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+    // @TODO: Create texture from font atlas
+    // MyTexture* texture = MyEngine::CreateTextureFromMemoryPixels(pixels, width, height, TEXTURE_TYPE_RGBA)
+    // @TODO: store opengl tex index
+    // io.Fonts->TexID = (void*)texture;
+}
+
 void reload_dll()
 {
     println( "[INFO]: DLL reloaded." );
     auto& appdata = get_dll_appdata();
     if( !appdata.sdl_info.window )
+    {
         init_graphics( appdata );
+        init_imgui( appdata );
+    }
     else
+    {
+        // this needs to be done on reload since it's loading function pointers
         assert(gladLoadGLLoader( &SDL_GL_GetProcAddress ), "Failed to load GL functions with GLAD.");
+    }
 
     reload_metadata( appdata );
     report_types( appdata );
@@ -151,32 +175,22 @@ void unload_dll( bool last_time )
 {
     auto& appdata = get_dll_appdata();
 
-    if( last_time && appdata.sdl_info.window )
+    if( last_time )
     {
-        SDL_GL_DeleteContext( appdata.sdl_info.opengl_context );
-        SDL_DestroyWindow( appdata.sdl_info.window );
-        appdata.sdl_info.window = nullptr;
+        ImGui::DestroyContext();
+
+        if( appdata.sdl_info.window )
+        {
+            SDL_GL_DeleteContext( appdata.sdl_info.opengl_context );
+            SDL_DestroyWindow( appdata.sdl_info.window );
+            appdata.sdl_info.window = nullptr;
+        }
     }
 
     println( "[INFO]: DLL unloaded." );
 }
 
 /*
-     // Application init
-     ImGui::CreateContext();
-     ImGuiIO& io = ImGui::GetIO();
-     io.DisplaySize.x = 1920.0f;
-     io.DisplaySize.y = 1280.0f;
-     // TODO: Fill others settings of the io structure later.
-
-     // Load texture atlas (there is a default font so you don't need to care about choosing a font yet)
-     unsigned char* pixels;
-     int width, height;
-     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-     // TODO: At this points you've got the texture data and you need to upload that your your graphic system:
-     MyTexture* texture = MyEngine::CreateTextureFromMemoryPixels(pixels, width, height, TEXTURE_TYPE_RGBA)
-     // TODO: Store your texture pointer/identifier (whatever your engine uses) in 'io.Fonts->TexID'. This will be passed back to your via the renderer.
-     io.Fonts->TexID = (void*)texture;
 
      // Application main loop
      while (true)
@@ -200,10 +214,13 @@ void unload_dll( bool last_time )
         MyImGuiRenderFunction(ImGui::GetDrawData());
         SwapBuffers();
      }
-
-     // Shutdown
-     ImGui::DestroyContext();
 */
+
+static void render_imgui_data( const ImDrawData* draw_data )
+{
+    
+
+}
 
 void loop_dll( )
 {
@@ -231,11 +248,16 @@ void loop_dll( )
         }
     }
 
+    ImGui::NewFrame();
+
     glClearColor( 0.00f, 1.67f, 0.88f, 1 );
     glClear( GL_COLOR_BUFFER_BIT );
 
     glClearColor( 0, 0, 0, 0 );
     glClear( GL_DEPTH_BUFFER_BIT );
+
+    ImGui::Render();
+    render_imgui_data( ImGui::GetDrawData() );
 
     SDL_GL_SwapWindow( appdata.sdl_info.window );
 }
