@@ -14,4 +14,7 @@ build/
 bin/
 generated/
 
+# vscode
+*.code-workspace
+
 settings.json
