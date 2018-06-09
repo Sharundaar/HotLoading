@@ -6,6 +6,7 @@
                 "path": [
                     "${workspaceRoot}/generated",
                     "${workspaceRoot}/src",
+                    "${workspaceRoot}/mathlib",
                     "${EXTERNALS}/GenMetadata/include",
                     "${EXTERNALS}/GLAD/include",
                     "${EXTERNALS}/SDL2-2.0.5/include",
@@ -16,6 +17,7 @@
             "includePath": [
                 "${workspaceRoot}/generated",
                 "${workspaceRoot}/src",
+                "${workspaceRoot}/mathlib",
                 "${EXTERNALS}/GenMetadata/include",
                 "${EXTERNALS}/GLAD/include",
                 "${EXTERNALS}/SDL2-2.0.5/include",
@@ -24,7 +26,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "MATHLIB_IMPLEMENTATION"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",

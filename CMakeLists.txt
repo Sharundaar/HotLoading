@@ -11,6 +11,7 @@ set(OPENGL "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x64")
 include_directories( 
     ./src/
     ./generated/
+    ./mathlib/
     ${TYPEINFO}/include
     ${SDL2}/include
     ${GLAD}/include
