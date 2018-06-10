@@ -25,6 +25,7 @@ struct Quaternion
 
 #ifdef MATHLIB_IMPLEMENTATION
 
+#include "basics.h"
 #include "math_helper.h"
 #include "vector.h"
 

@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <vector>
 
+#include "mathlib.h"
+#include "memory_pool.h"
 #include "basic_types.h"
 #include "types.h"
 
@@ -48,6 +50,8 @@ struct Appdata
     DLLInfo   dll_info = {};
     SDLInfo   sdl_info = {};
     Metadata  metadata = {};
+
+    MemoryPool<Vector3> vector_pool;
 
     bool      running = false;
 };
