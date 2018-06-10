@@ -2,6 +2,7 @@
 
 #include "vector.h"
 #include "quaternion.h"
+#include "size.h"
 
 struct Matrix3
 {
@@ -65,6 +66,8 @@ struct Matrix4
 };
 
 #ifdef MATHLIB_IMPLEMENTATION
+
+#include "basics.h"
 
 Matrix3 Matrix3::operator*(const Matrix3& other) const
 {
