@@ -2,12 +2,8 @@
 
 #include <windows.h>
 
-#define MATHLIB_IMPLEMENTATION
-
 #include "appdata.h"
 #include "basics.h"
-
-#include "mathlib.h"
 
 struct RAIIHandle
 {

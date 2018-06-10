@@ -70,7 +70,7 @@ Quaternion Quaternion::Invert( const Quaternion& quat )
 
 Quaternion Quaternion::FromAxisAngle( float angle_in_degree, const Vector3& axis )
 {
-    assert( !AlmostZero( axis.LengthSqr() ), "Error: Axis must be non zero." );
+    ML_ASSERT( !AlmostZero( axis.LengthSqr() ), "Error: Axis must be non zero." );
 
     float cosine = cosf( DEG2RAD * angle_in_degree / 2.0f );
     float sine   = sinf( DEG2RAD * angle_in_degree / 2.0f );

@@ -99,7 +99,7 @@ Vector2 Matrix3::Apply(const Vector2& target) const
     result.x = m[0][0] * target.x + m[0][1] * target.y + m[0][2];
     result.y = m[1][0] * target.x + m[1][1] * target.y + m[1][2];
     float w  = m[2][0] * target.x + m[2][1] * target.y + m[2][2];
-    assert(!AlmostZero(w), "Matrix projection leads to division by 0 !");
+    ML_ASSERT(!AlmostZero(w), "Matrix projection leads to division by 0 !");
     result.x /= w;
     result.y /= w;
     return result;
@@ -156,7 +156,7 @@ Matrix3 Matrix3::TSRMatrix(const Vector2& translation, const Vector2& scale, flo
 
 Matrix3 Matrix3::ViewMatrix (const Vector2& position, const Vector2& scale, float angle_in_degree, const Size& viewport)
 {
-    assert( viewport.width != 0 && viewport.height != 0, "viewport parameter must be non 0.");
+    ML_ASSERT( viewport.width != 0 && viewport.height != 0, "viewport parameter must be non 0.");
 
     return TranslationMatrix( -1.0f * position ) * RotationMatrix( -angle_in_degree ) * ScaleMatrix( { 2.0f / viewport.width, 2.0f / viewport.height } );
 }

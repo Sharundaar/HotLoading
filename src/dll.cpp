@@ -2,13 +2,16 @@
 #include <glad/glad.h>
 #include <imgui.h>
 
-#include "dll.h"
-
 #include "basics.h"
 
 #define TYPES_IMPLEMENTATION
 #include "types.h"
-#undef TYPES_IMPLEMENTATION
+
+#define MATHLIB_IMPLEMENTATION
+#define ML_ASSERT(EXPR, MSG) assert(EXPR, MSG)
+#include "mathlib.h"
+
+#include "dll.h"
 
 #include "type_db.h"
 
