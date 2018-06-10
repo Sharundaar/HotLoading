@@ -8,7 +8,6 @@
 extern "C" 
 {
     DLLEXPORT void      set_dll_appdata( Appdata* appdata );
-    DLLEXPORT TypeStore get_dll_types();
 
     DLLEXPORT void loop_dll();   // called reapetedly
     DLLEXPORT void reload_dll(); // called after reload

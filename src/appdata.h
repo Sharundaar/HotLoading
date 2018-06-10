@@ -3,7 +3,9 @@
 #include <SDL.h>
 #include <windows.h>
 #include <vector>
-#include "store.h"
+
+#include "basic_types.h"
+#include "types.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -43,7 +45,6 @@ struct Metadata
 
 struct Appdata
 {
-    TypeStore type_store = {};
     DLLInfo   dll_info = {};
     SDLInfo   sdl_info = {};
     Metadata  metadata = {};
