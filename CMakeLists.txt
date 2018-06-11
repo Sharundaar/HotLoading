@@ -38,7 +38,8 @@ set(LIBSRC ${COMMONSRC}
             src/file_parser.cpp
             src/shader.cpp
             src/mesh.cpp
-            src/texture.cpp )
+            src/texture.cpp
+            src/immediate_mode.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )
