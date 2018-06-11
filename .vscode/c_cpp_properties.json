@@ -10,7 +10,8 @@
                     "${EXTERNALS}/GenMetadata/include",
                     "${EXTERNALS}/GLAD/include",
                     "${EXTERNALS}/SDL2-2.0.5/include",
-                    "${EXTERNALS}/IMGUI"
+                    "${EXTERNALS}/IMGUI",
+                    "${EXTERNALS}/ASSIMP/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
@@ -21,7 +22,8 @@
                 "${EXTERNALS}/GenMetadata/include",
                 "${EXTERNALS}/GLAD/include",
                 "${EXTERNALS}/SDL2-2.0.5/include",
-                "${EXTERNALS}/IMGUI"
+                "${EXTERNALS}/IMGUI",
+                "${EXTERNALS}/ASSIMP/include"
             ],
             "defines": [
                 "_DEBUG",

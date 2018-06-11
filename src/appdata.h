@@ -10,6 +10,7 @@
 #include "types.h"
 #include "resource.h"
 #include "shader.h"
+#include "mesh.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -52,6 +53,7 @@ struct GlobalStore
     MemoryPool<ResourceSource> resource_sources_pool = {};
     MemoryPool<Shader>         shader_pool = {};
     MemoryPool<MaterialDef>    material_pool = {};
+    MemoryPool<MeshDef>        mesh_pool = {};
 };
 
 struct Appdata

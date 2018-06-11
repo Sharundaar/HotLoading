@@ -6,6 +6,7 @@ set(TYPEINFO ${EXTERNALS}/GenMetadata)
 set(SDL2 ${EXTERNALS}/SDL2-2.0.5)
 set(GLAD ${EXTERNALS}/GLAD)
 set(IMGUI ${EXTERNALS}/imgui)
+set(ASSIMP ${EXTERNALS}/ASSIMP)
 set(OPENGL "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x64")
 
 include_directories( 
@@ -16,7 +17,7 @@ include_directories(
     ${SDL2}/include
     ${GLAD}/include
     ${IMGUI}
-     )
+    ${ASSIMP}/include )
 
 set(LIBRARY_OUTPUT_PATH ../bin)
 set(EXECUTABLE_OUTPUT_PATH ../bin)
@@ -33,7 +34,8 @@ set(LIBSRC ${COMMONSRC}
             src/dll.cpp
             src/resource.cpp
             src/file_parser.cpp
-            src/shader.cpp )
+            src/shader.cpp
+            src/mesh.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )
@@ -46,7 +48,8 @@ add_executable(HotLoading ${EXECSRC})
 target_link_libraries(HotLoadingDLL
                         ${OPENGL}/opengl32.lib
                         ${SDL2}/lib/x64/SDL2main.lib
-                        ${SDL2}/lib/x64/SDL2.lib )
+                        ${SDL2}/lib/x64/SDL2.lib
+                        ${ASSIMP}/lib/assimp-vc140-mt.lib )
 
 target_link_libraries(HotLoading
                         ${SDL2}/lib/x64/SDL2main.lib
