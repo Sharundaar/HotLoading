@@ -9,6 +9,7 @@
 #include "basic_types.h"
 #include "types.h"
 #include "resource.h"
+#include "shader.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -48,7 +49,9 @@ struct Metadata
 
 struct GlobalStore
 {
-    MemoryPool<ResourceSource> resource_sources_pool;
+    MemoryPool<ResourceSource> resource_sources_pool = {};
+    MemoryPool<Shader>         shader_pool = {};
+    MemoryPool<MaterialDef>    material_pool = {};
 };
 
 struct Appdata

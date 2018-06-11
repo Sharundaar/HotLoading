@@ -25,15 +25,15 @@ set(GLAD_SRC ${GLAD}/src/glad.c)
 set(IMGUI_SRC ${IMGUI}/imgui.cpp
               ${IMGUI}/imgui_demo.cpp
               ${IMGUI}/imgui_draw.cpp)
-set(COMMONSRC src/basics.cpp)
+set(COMMONSRC src/basics.cpp generated/type_db.cpp)
 
 set(LIBSRC ${COMMONSRC}
             ${IMGUI_SRC} 
             ${GLAD_SRC}
             src/dll.cpp
-            generated/type_db.cpp
             src/resource.cpp
-            src/file_parser.cpp )
+            src/file_parser.cpp
+            src/shader.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )

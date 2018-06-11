@@ -2,6 +2,7 @@
 
 #include <windows.h>
 
+#define TYPES_IMPLEMENTATION // @Todo: Remove that when appdata is entirely in the DLL
 #include "appdata.h"
 #include "basics.h"
 
