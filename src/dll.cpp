@@ -266,3 +266,5 @@ void loop_dll( )
 
     SDL_GL_SwapWindow( appdata.sdl_info.window );
 }
+
+ const TypeInfo* Object::get_type() const { return get_dll_appdata().metadata.type_infos[m_type_id.local_type]; }

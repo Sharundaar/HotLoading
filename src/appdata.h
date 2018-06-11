@@ -8,6 +8,7 @@
 #include "memory_pool.h"
 #include "basic_types.h"
 #include "types.h"
+#include "resource.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -45,13 +46,18 @@ struct Metadata
     std::vector<const TypeInfo*> type_infos = {};
 };
 
+struct GlobalStore
+{
+    MemoryPool<ResourceSource> resource_sources_pool;
+};
+
 struct Appdata
 {
     DLLInfo   dll_info = {};
     SDLInfo   sdl_info = {};
     Metadata  metadata = {};
 
-    MemoryPool<Vector3> vector_pool;
+    GlobalStore global_store = {};
 
     bool      running = false;
 };

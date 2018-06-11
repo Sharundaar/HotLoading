@@ -31,7 +31,8 @@ set(LIBSRC ${COMMONSRC}
             ${IMGUI_SRC} 
             ${GLAD_SRC}
             src/dll.cpp
-            generated/type_db.cpp )
+            generated/type_db.cpp
+            src/resource.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )

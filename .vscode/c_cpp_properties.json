@@ -27,7 +27,8 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "MATHLIB_IMPLEMENTATION"
+                "MATHLIB_IMPLEMENTATION",
+                "TYPES_IMPLEMENTATION"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
