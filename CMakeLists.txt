@@ -32,7 +32,8 @@ set(LIBSRC ${COMMONSRC}
             ${GLAD_SRC}
             src/dll.cpp
             generated/type_db.cpp
-            src/resource.cpp )
+            src/resource.cpp
+            src/file_parser.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )
