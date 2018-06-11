@@ -11,7 +11,8 @@
                     "${EXTERNALS}/GLAD/include",
                     "${EXTERNALS}/SDL2-2.0.5/include",
                     "${EXTERNALS}/IMGUI",
-                    "${EXTERNALS}/ASSIMP/include"
+                    "${EXTERNALS}/ASSIMP/include",
+                    "${EXTERNALS}/STB"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
@@ -23,7 +24,8 @@
                 "${EXTERNALS}/GLAD/include",
                 "${EXTERNALS}/SDL2-2.0.5/include",
                 "${EXTERNALS}/IMGUI",
-                "${EXTERNALS}/ASSIMP/include"
+                "${EXTERNALS}/ASSIMP/include",
+                "${EXTERNALS}/STB"
             ],
             "defines": [
                 "_DEBUG",

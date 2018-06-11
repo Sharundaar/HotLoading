@@ -7,6 +7,7 @@ set(SDL2 ${EXTERNALS}/SDL2-2.0.5)
 set(GLAD ${EXTERNALS}/GLAD)
 set(IMGUI ${EXTERNALS}/imgui)
 set(ASSIMP ${EXTERNALS}/ASSIMP)
+set(STB ${EXTERNALS}/STB)
 set(OPENGL "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/um/x64")
 
 include_directories( 
@@ -17,7 +18,8 @@ include_directories(
     ${SDL2}/include
     ${GLAD}/include
     ${IMGUI}
-    ${ASSIMP}/include )
+    ${ASSIMP}/include
+    ${STB} )
 
 set(LIBRARY_OUTPUT_PATH ../bin)
 set(EXECUTABLE_OUTPUT_PATH ../bin)
@@ -35,7 +37,8 @@ set(LIBSRC ${COMMONSRC}
             src/resource.cpp
             src/file_parser.cpp
             src/shader.cpp
-            src/mesh.cpp )
+            src/mesh.cpp
+            src/texture.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )
