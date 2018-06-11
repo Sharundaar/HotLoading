@@ -12,8 +12,9 @@
 #include "mathlib.h"
 
 #include "dll.h"
-
 #include "type_db.h"
+
+#include "object.h"
 
 Appdata  s_default_appdata = {};
 Appdata* s_appdata = nullptr;
@@ -162,7 +163,6 @@ void reload_dll()
     if( !appdata.sdl_info.window )
     {
         init_graphics( appdata );
-        init_imgui( appdata );
     }
     else
     {
@@ -170,6 +170,7 @@ void reload_dll()
         assert(gladLoadGLLoader( &SDL_GL_GetProcAddress ), "Failed to load GL functions with GLAD.");
     }
 
+    init_imgui( appdata );
     reload_metadata( appdata );
     report_types( appdata );
 }
@@ -178,10 +179,10 @@ void unload_dll( bool last_time )
 {
     auto& appdata = get_dll_appdata();
 
+    ImGui::DestroyContext();
+
     if( last_time )
     {
-        ImGui::DestroyContext();
-
         if( appdata.sdl_info.window )
         {
             SDL_GL_DeleteContext( appdata.sdl_info.opengl_context );
@@ -243,6 +244,7 @@ void loop_dll( )
                         break;
                 }
             }
+            break;
             case SDL_QUIT:
                 appdata.running = false;
                 break;
