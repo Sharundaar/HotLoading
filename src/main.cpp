@@ -21,36 +21,17 @@ bool dll_need_reload( Appdata& appdata )
     FILETIME last_pdb_write_time;
 
     {
-        RAIIHandle dll_handle = { CreateFileW( 
-            L"HotLoadingDLL.dll",
-            GENERIC_READ,
-            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            NULL,
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
-            NULL
-        ) };
+        WIN32_FILE_ATTRIBUTE_DATA dll_info;
+        WIN32_FILE_ATTRIBUTE_DATA pdb_info;
 
-        if( !dll_handle )
+        if( !GetFileAttributesExW( L"HotLoadingDLL.dll", GetFileExInfoStandard, &dll_info ) )
             return false;
 
-        RAIIHandle pdb_handle = { CreateFileW( 
-            L"HotLoadingDLL.pdb",
-            GENERIC_READ,
-            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            NULL,
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
-            NULL
-        ) };
-
-        if( !pdb_handle )
+        if( !GetFileAttributesExW( L"HotLoadingDLL.pdb", GetFileExInfoStandard, &pdb_info ) )
             return false;
 
-        if( GetFileTime( dll_handle, nullptr, nullptr, &last_dll_write_time ) == 0 )
-            return false;
-        if( GetFileTime( pdb_handle, nullptr, nullptr, &last_pdb_write_time ) == 0 )
-            return false;
+        last_dll_write_time = dll_info.ftLastWriteTime;
+        last_pdb_write_time = pdb_info.ftLastWriteTime;
     }
 
     if( appdata.dll_info.instance != nullptr )
@@ -87,7 +68,7 @@ void reload_dll( Appdata& appdata )
     CopyFileW( L"HotLoadingDLL.pdb", L"HotLoadingDLL_loaded.pdb", false );
 
     appdata.dll_info.instance = LoadLibraryW( L"HotLoadingDLL_loaded.dll" );
-    assert( appdata.dll_info.instance, "Failed to load HotLoadingDLL_loaded." );
+    assert_fmt( appdata.dll_info.instance, "Failed to load HotLoadingDLL_loaded. ( error code: % )", GetLastError() );
 
     appdata.dll_info.loop_func = GetProcAddress( appdata.dll_info.instance, "loop_dll" );
     assert( appdata.dll_info.loop_func, "Failed to load loop_dll function." );
