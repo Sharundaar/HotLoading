@@ -28,13 +28,6 @@ template<> void format<long>   (std::string& out, const long& val);
 template<> void format<unsigned int>   (std::string& out, const unsigned int  & val);
 template<> void format<unsigned long>  (std::string& out, const unsigned long & val);
 
-// @Bug: There may be a bug here... out is not used
-template<typename T>
-const char* format(const char* fmt, std::string& out)
-{
-    return fmt;
-}
-
 template<typename T>
 const char* format(const char* fmt, std::string& out, const T& val)
 {
@@ -48,6 +41,7 @@ const char* format(const char* fmt, std::string& out, const T& val)
     if(*ptr == '\0') return ptr;
     format(out, val);
     ++ptr;
+    while(*ptr != '\0') out += *(ptr++); // dump the rest of the string
     return ptr;
 }
 
