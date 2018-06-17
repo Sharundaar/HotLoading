@@ -224,7 +224,7 @@ void unload_dll( bool last_time )
 
 static void render_imgui_data( const ImDrawData* draw_data )
 {
-    
+
     
 
 }
@@ -246,8 +246,26 @@ void loop_dll( )
                         appdata.running = false;
                         break;
                 }
+                break;
             }
-            break;
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+            {
+                switch(evt.button.button)
+                {
+                    case SDL_BUTTON_LEFT:
+                        appdata.input_state.lmouse_down = evt.button.state == SDL_PRESSED;
+                        break;
+                    case SDL_BUTTON_RIGHT:
+                        appdata.input_state.rmouse_down = evt.button.state == SDL_PRESSED;
+                        break;
+                }
+                break;
+            }
+            case SDL_MOUSEMOTION:
+                appdata.input_state.mouse_position.x = (float)evt.motion.x;
+                appdata.input_state.mouse_position.y = (float)evt.motion.y;
+                break;
             case SDL_QUIT:
                 appdata.running = false;
                 break;
@@ -255,6 +273,12 @@ void loop_dll( )
                 break;
         }
     }
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.DeltaTime = 1.0f/60.0f;
+    io.MousePos = { appdata.input_state.mouse_position.x, appdata.input_state.mouse_position.y };
+    io.MouseDown[0] = appdata.input_state.lmouse_down;
+    io.MouseDown[1] = appdata.input_state.rmouse_down;
 
     ImGui::NewFrame();
 

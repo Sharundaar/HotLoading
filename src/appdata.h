@@ -56,6 +56,13 @@ struct GlobalStore
     MemoryPool<MeshDef>        mesh_pool = {};
 };
 
+struct InputState
+{
+    Vector2 mouse_position = {};
+    bool lmouse_down = false;
+    bool rmouse_down = false;
+};
+
 struct Appdata
 {
     DLLInfo   dll_info = {};
@@ -63,6 +70,7 @@ struct Appdata
     Metadata  metadata = {};
 
     GlobalStore global_store = {};
+    InputState  input_state = {};
 
     bool      running = false;
 };
