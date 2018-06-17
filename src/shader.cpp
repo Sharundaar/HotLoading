@@ -87,8 +87,24 @@ char* extract_shader_name( const char* file, char* buffer, uint buffer_length )
     return buffer;
 }
 
+Shader* get_shader( const char* source_file )
+{
+    auto& appdata = get_dll_appdata();
+    for(auto shader : appdata.global_store.shader_pool)
+    {
+        if( shader->source->file == source_file )
+            return shader;
+    }
+    return nullptr;
+}
+
 Shader* load_shader( const char* source_file )
 {
+    {
+        auto shader = get_shader( source_file );
+        if( shader ) return shader;
+    }
+
     std::string VERTEX_SHADER_TOKEN = "vertex";
     std::string FRAGMENT_SHADER_TOKEN = "fragment";
     std::string PARAMS_TOKEN = "params";

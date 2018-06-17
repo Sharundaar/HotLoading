@@ -13,8 +13,8 @@
 
 #include "dll.h"
 #include "type_db.h"
-
 #include "object.h"
+#include "immediate_mode.h"
 
 Appdata  s_default_appdata = {};
 Appdata* s_appdata = nullptr;
@@ -171,6 +171,7 @@ void reload_dll()
     }
 
     init_imgui( appdata );
+    init_immediate();
     reload_metadata( appdata );
     report_types( appdata );
 }
@@ -180,6 +181,7 @@ void unload_dll( bool last_time )
     auto& appdata = get_dll_appdata();
 
     ImGui::DestroyContext();
+    cleanup_immediate();
 
     if( last_time )
     {
@@ -261,6 +263,16 @@ void loop_dll( )
 
     glClearColor( 0, 0, 0, 0 );
     glClear( GL_DEPTH_BUFFER_BIT );
+
+    immediate_set_view_matrix( Matrix4::RotationTranslation( { 0, 0, 1 } , Quaternion::Identity() ) ); 
+    immediate_set_projection_matrix( Matrix4::OpenGLProjectionMatrix( 90.0f, appdata.sdl_info.width / appdata.sdl_info.height, 0.001f, 1000.0f ) );
+
+    immediate_draw_quad( { -1, -1, 0 }, { 1, 0, 0, 1 },
+                        { -1, 1, 0 }, { 0, 1, 0, 1 },
+                        { 1, -1, 0 }, { 0, 0, 1, 1 },
+                        { 1, 1, 0 }, { 1, 0, 1, 1 } );
+
+    immediate_flush();
 
     ImGui::Render();
     render_imgui_data( ImGui::GetDrawData() );

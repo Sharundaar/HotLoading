@@ -286,6 +286,7 @@ public:
 
         if( ( current_blob_allocated_idx * 8 >= current_blob->high ) || ( current_blob_allocated_idx * 8 >= current_blob->size() ) )
         {
+            current_blob_allocated_bit = 0;
             current_blob_allocated_idx = 0;
             current_blob = current_blob->next;
         }

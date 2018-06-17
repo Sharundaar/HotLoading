@@ -65,8 +65,10 @@ void init_immediate()
 void cleanup_immediate()
 {
     immediate_clear();
-    glDeleteProgram( immediate_shader->program );
-    immediate_shader->program = NULL;
+    glDeleteBuffers( 4, &immediate_context.vbo_vertices );
+    glDeleteTextures( 1, &immediate_context.texture );
+    glDeleteVertexArrays( 1, &immediate_context.vao );
+    immediate_shader = nullptr;
 }
 
 void immediate_clear()
