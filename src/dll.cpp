@@ -48,7 +48,7 @@ static void setup_opengl_attributes()
 static void setup_opengl_context( Appdata& appdata )
 {
     appdata.sdl_info.opengl_context = SDL_GL_CreateContext( appdata.sdl_info.window );
-    SDL_GL_SetSwapInterval( 0 );
+    SDL_GL_SetSwapInterval( 1 );
 
     // init GLAD AFTER the GL Context
     print("Initialing GLAD...");
@@ -60,7 +60,6 @@ static void setup_opengl_context( Appdata& appdata )
     println("Version: %",  (const char*) glGetString(GL_VERSION));
 
     glViewport( 0, 0, (int) appdata.sdl_info.width, (int) appdata.sdl_info.height );
-    glEnable( GL_DEPTH_TEST );
 }
 
 static void create_sdl_window( Appdata& appdata )
@@ -302,6 +301,9 @@ void loop_dll( )
                     case SDLK_F11:
                         appdata.app_state.debug_open = !appdata.app_state.debug_open;
                         break;
+                    case SDLK_F10:
+                        appdata.app_state.demo_window_open = !appdata.app_state.demo_window_open;
+                        break;
                 }
                 break;
             }
@@ -365,8 +367,8 @@ void loop_dll( )
     if( appdata.app_state.debug_open )
     {
         ImGui::Begin( "Debug", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
-
-            ImGui::ListBox( "Types: ", &appdata.app_state.type_list_current_item, [](void* data, int idx, const char** out_text) -> bool {
+            ImGui::Text("Types: ");
+            ImGui::SameLine(); ImGui::ListBox( "", &appdata.app_state.type_list_current_item, [](void* data, int idx, const char** out_text) -> bool {
                 auto type_infos = (const TypeInfo**) data;
                 *out_text = type_infos[idx]->name;
                 return true;
@@ -374,6 +376,9 @@ void loop_dll( )
             if(ImGui::Button("Quit")) appdata.app_state.running = false;
         ImGui::End();
     }
+
+    if( appdata.app_state.demo_window_open )
+        ImGui::ShowDemoWindow(&appdata.app_state.demo_window_open);
 
     ImGui::Render();
     render_imgui_data( ImGui::GetDrawData() );

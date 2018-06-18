@@ -80,6 +80,8 @@ struct TestData
 struct AppState
 {
     bool debug_open = false;
+    bool demo_window_open = true;
+
     bool running = false;
     
     int type_list_current_item = 0;
