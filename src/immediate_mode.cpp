@@ -28,8 +28,6 @@ struct ImmediateContext
     uint vbo_colors   = 0;
     uint vbo_uvws     = 0;
     uint vbo_indices  = 0;
-
-    uint texture = 0;
     uint vao     = 0;
     
     uint draw_type = GL_TRIANGLES;
@@ -38,7 +36,12 @@ struct ImmediateContext
     Matrix4 view_matrix = Matrix4::Identity();
     float depth = 0.0f;
 
+    bool depth_test = true;
+    bool alpha_blending = true;
+    bool face_culling = true;
+
     const Shader* shader = nullptr;
+    const Texture* texture = nullptr;
 };
 
 namespace
@@ -49,7 +52,6 @@ namespace
     void Initialize_ImmediateContext()
     {
         glGenBuffers( 4, &immediate_context.vbo_vertices );
-        glGenTextures( 1, &immediate_context.texture );
         glGenVertexArrays( 1, &immediate_context.vao );
     
         immediate_shader = load_shader( "datas/shaders/immediate_shader.glsl" );
@@ -66,7 +68,6 @@ void cleanup_immediate()
 {
     immediate_clear();
     glDeleteBuffers( 4, &immediate_context.vbo_vertices );
-    glDeleteTextures( 1, &immediate_context.texture );
     glDeleteVertexArrays( 1, &immediate_context.vao );
     immediate_shader = nullptr;
 }
@@ -76,8 +77,13 @@ void immediate_clear()
     immediate_context.vertex_count = 0;
     immediate_context.index_count  = 0;
     immediate_set_shader( *immediate_shader );
+    immediate_set_texture( nullptr );
     immediate_context.world_matrix = Matrix4::Identity();
     immediate_context.draw_type = GL_TRIANGLES;
+
+    immediate_context.depth_test = true;
+    immediate_context.alpha_blending = true;
+    immediate_context.face_culling = true;
 }
 
 void immediate_set_world_matrix( const Matrix4& w )
@@ -95,18 +101,9 @@ void immediate_set_projection_matrix( const Matrix4& p )
     immediate_context.projection_matrix = p;
 }
 
-void immediate_set_texture( const Texture& texture )
+void immediate_set_texture( const Texture* texture )
 {
-    glBindTexture( GL_TEXTURE_2D, immediate_context.texture );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, (GLsizei) texture.size.width, (GLsizei) texture.size.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data );
-
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-
-    glGenerateMipmap( GL_TEXTURE_2D );
+    immediate_context.texture = texture;
 }
 
 void immediate_set_draw_type( uint type )
@@ -119,6 +116,10 @@ void immediate_set_depth( float depth )
 {
     immediate_context.depth = depth;
 }
+
+void immediate_enable_depth_test( bool enabled ) { immediate_context.depth_test = enabled; }
+void immediate_enable_blend( bool enabled ) { immediate_context.alpha_blending = enabled; }
+void immediate_enable_face_cull( bool enabled ) { immediate_context.face_culling = enabled; }
 
 void immediate_flush()
 {
@@ -134,6 +135,27 @@ void immediate_flush()
 
     const Shader& shader = *immediate_context.shader;
     glUseProgram( shader.program );
+
+    if( immediate_context.depth_test )
+        glEnable( GL_DEPTH_TEST );
+    else
+        glDisable( GL_DEPTH_TEST );
+
+    if( immediate_context.face_culling )
+        glEnable( GL_CULL_FACE );
+    else
+        glDisable( GL_CULL_FACE );
+
+    if( immediate_context.alpha_blending )
+    {
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable( GL_BLEND );
+    }
+    else
+    {
+        glDisable( GL_BLEND );
+    }
 
     const MaterialDef& def = *shader.material;
     for( int i=0; i<def.params.size(); ++i )
@@ -171,16 +193,29 @@ void immediate_flush()
             switch( param.type )
             {
             case MaterialParamType::TEXTURE2D:
+            if( immediate_context.texture )
+            {
                 glActiveTexture( GL_TEXTURE0 );
-                glBindTexture( GL_TEXTURE_2D, immediate_context.texture );
+                glBindTexture( GL_TEXTURE_2D, immediate_context.texture->buffer );
                 glUniform1i( param.location, 0 );
+            }
+            break;
             default:
                 assert(false, "Error: Unhandled param type.");
+                break;
             }
 
         default:
             assert(false, "Error: Unhandled param usage.");
+            break;
         }
+    }
+
+    if( immediate_context.texture )
+    {
+        glActiveTexture( GL_TEXTURE0 );
+        glBindTexture( GL_TEXTURE_2D, immediate_context.texture->buffer );
+        // glUniform1i( 3, 0 );
     }
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, context.vbo_indices );
@@ -262,6 +297,37 @@ void immediate_draw_triangle(
     vertex_count++;
     vertices[vertex_count] = p3;
     colors  [vertex_count] = c3;
+    indices[index_count++] = vertex_count;
+    vertex_count++;
+}
+
+void immediate_draw_triangle(  const Vector3& p1, const Color& c1, const Vector2& uv1,
+                                const Vector3& p2, const Color& c2, const Vector2& uv2,
+                                const Vector3& p3, const Color& c3, const Vector2& uv3 )
+{
+    auto& vertex_count = immediate_context.vertex_count;
+    auto& index_count  = immediate_context.index_count;
+    auto& vertices     = immediate_context.vertices;
+    auto& colors       = immediate_context.colors;
+    auto& uvws         = immediate_context.uvws;
+    auto& indices      = immediate_context.indices;
+
+    assert(vertex_count + 3 <= IMMEDIATE_VERTEX_COUNT, "No vertices left to make an immediate triangle.");
+    assert(index_count  + 3 <= IMMEDIATE_INDEX_COUNT,  "No indices left to make an immediate triangle.");
+
+    vertices[vertex_count] = p1;
+    colors  [vertex_count] = c1;
+    uvws    [vertex_count] = uv1;
+    indices[index_count++] = vertex_count;
+    vertex_count++;
+    vertices[vertex_count] = p2;
+    colors  [vertex_count] = c2;
+    uvws    [vertex_count] = uv2;
+    indices[index_count++] = vertex_count;
+    vertex_count++;
+    vertices[vertex_count] = p3;
+    colors  [vertex_count] = c3;
+    uvws    [vertex_count] = uv3;
     indices[index_count++] = vertex_count;
     vertex_count++;
 }
@@ -379,12 +445,14 @@ void immediate_draw_mesh( const MeshDef* mesh )
     auto& ic_index_count  = immediate_context.index_count;
     auto& ic_vertices     = immediate_context.vertices;
     auto& ic_colors       = immediate_context.colors;
+    auto& ic_uvs          = immediate_context.uvws;
     auto& ic_indices      = immediate_context.indices;
 
     for( uint i=0; i < mesh->vertex_count; ++i )
     {
         ic_vertices[ic_vertex_count + i] = mesh->vertices[i].position;
         ic_colors  [ic_vertex_count + i] = mesh->vertices[i].color;
+        ic_uvs     [ic_vertex_count + i] = mesh->vertices[i].uv;
     }
     ic_vertex_count += mesh->vertex_count;
 

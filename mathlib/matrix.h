@@ -60,6 +60,7 @@ struct Matrix4
     static Matrix4 ScaleMatrix      ( const Vector3& scale );
     static Matrix4 RotationMatrix   ( float angle_in_degree, const Vector3& axis );
     static Matrix4 OpenGLProjectionMatrix ( float fov, float aspect, float near, float far );
+    static Matrix4 OrthographicProjection( float r, float l, float t, float b, float n, float f );
 
     static Matrix4 FromQuaternion( const Quaternion& q );
     static Matrix4 RotationTranslation( const Vector3& translation, const Quaternion& quaternion );
@@ -308,6 +309,25 @@ Matrix4 Matrix4::OpenGLProjectionMatrix ( float fov, float aspect, float _near, 
     p.m23 = 0; p.m24 = 0;
     p.m12 = 0; p.m13 = 0; p.m14 = 0;
 
+    return p;
+}
+
+Matrix4 Matrix4::OrthographicProjection( float r, float l, float t, float b, float n, float f )
+{
+    Matrix4 p;
+
+    float rml = r - l;
+    float rpl = r + l;
+    float tmb = t - b;
+    float tpb = t + b;
+    float fmn = f - n;
+    float fpn = f + n;
+
+    p.m11 = 2 / rml; p.m12 = 0; p.m13 = 0; p.m14 = - rpl / rml;
+    p.m21 = 0; p.m22 = 2 / tmb; p.m23 = 0; p.m24 = - tpb / tmb;
+    p.m31 = 0; p.m32 = 0; p.m33 = -2 / fmn; p.m34 = -fpn / fmn;
+    p.m41 = 0; p.m42 = 0; p.m43 = 0; p.m44 = 1;
+    
     return p;
 }
 

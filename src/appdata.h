@@ -11,6 +11,7 @@
 #include "resource.h"
 #include "shader.h"
 #include "mesh.h"
+#include "texture.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -54,6 +55,7 @@ struct GlobalStore
     MemoryPool<Shader>         shader_pool = {};
     MemoryPool<MaterialDef>    material_pool = {};
     MemoryPool<MeshDef>        mesh_pool = {};
+    MemoryPool<Texture>        texture_pool = {};
 };
 
 struct InputState
@@ -63,14 +65,34 @@ struct InputState
     bool rmouse_down = false;
 };
 
+struct ImguiInfo
+{
+    Texture* texture = {};
+    Shader* shader  = nullptr;
+};
+
+struct TestData
+{
+    Texture* checkerboard_texture = nullptr;
+    Shader* texture_shader = nullptr;
+};
+
+struct AppState
+{
+    bool debug_open = false;
+    bool running = false;
+};
+
 struct Appdata
 {
     DLLInfo   dll_info = {};
     SDLInfo   sdl_info = {};
+    ImguiInfo imgui_info = {};
     Metadata  metadata = {};
 
     GlobalStore global_store = {};
     InputState  input_state = {};
 
-    bool      running = false;
+    TestData    test_data = {};
+    AppState    app_state = {};
 };

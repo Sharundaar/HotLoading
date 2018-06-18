@@ -2,6 +2,8 @@
 
 #include <windows.h>
 
+#define ML_ASSERT( COND, MSG )
+#define MATHLIB_IMPLEMENTATION
 #define TYPES_IMPLEMENTATION // @Todo: Remove that when appdata is entirely in the DLL
 #include "appdata.h"
 #include "basics.h"
@@ -92,8 +94,8 @@ int main(int, char**)
 {
     Appdata appdata;
 
-    appdata.running = true;
-    while( appdata.running )
+    appdata.app_state.running = true;
+    while( appdata.app_state.running )
     {
         if( dll_need_reload( appdata ) ) reload_dll( appdata );
         reinterpret_cast< void(*)() >( appdata.dll_info.loop_func )();
