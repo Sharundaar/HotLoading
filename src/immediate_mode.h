@@ -26,6 +26,8 @@ void immediate_enable_depth_test( bool enabled );
 void immediate_enable_blend( bool enabled );
 void immediate_enable_face_cull( bool enabled );
 
+void immediate_set_scissor_window( Vector2 pos, Size size );
+
 void immediate_draw_line(  const Vector3& p1, const Color& c1,
                             const Vector3& p2, const Color& c2);
 

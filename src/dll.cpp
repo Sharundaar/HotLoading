@@ -239,6 +239,15 @@ static void render_imgui_data( const ImDrawData* draw_data )
                 immediate_enable_depth_test( false );
                 immediate_enable_face_cull( false );
 
+                immediate_set_scissor_window( {
+                    pcmd->ClipRect.x,
+                    sdl_info.height - pcmd->ClipRect.w
+                }, 
+                {
+                    pcmd->ClipRect.z - pcmd->ClipRect.x,
+                    pcmd->ClipRect.w - pcmd->ClipRect.y,
+                } );
+
                 immediate_set_shader( *imgui_info.shader );
                 immediate_set_projection_matrix( Matrix4::OrthographicProjection( sdl_info.width, 0, 0, sdl_info.height, -1, 1 ) );
 
@@ -329,6 +338,8 @@ void loop_dll( )
     io.MouseDown[1] = appdata.input_state.rmouse_down;
 
     ImGui::NewFrame();
+
+    glDisable( GL_SCISSOR_TEST );
 
     glClearColor( 0.00f, 1.67f, 0.88f, 1 );
     glClear( GL_COLOR_BUFFER_BIT );

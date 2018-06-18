@@ -40,6 +40,9 @@ struct ImmediateContext
     bool alpha_blending = true;
     bool face_culling = true;
 
+    bool scissoring = false;
+    Vector4 scissor_window = {};
+
     const Shader* shader = nullptr;
     const Texture* texture = nullptr;
 };
@@ -84,6 +87,9 @@ void immediate_clear()
     immediate_context.depth_test = true;
     immediate_context.alpha_blending = true;
     immediate_context.face_culling = true;
+
+    immediate_context.scissoring = false;
+    immediate_context.scissor_window = {};
 }
 
 void immediate_set_world_matrix( const Matrix4& w )
@@ -121,6 +127,8 @@ void immediate_enable_depth_test( bool enabled ) { immediate_context.depth_test 
 void immediate_enable_blend( bool enabled ) { immediate_context.alpha_blending = enabled; }
 void immediate_enable_face_cull( bool enabled ) { immediate_context.face_culling = enabled; }
 
+void immediate_set_scissor_window( Vector2 pos, Size size ) { immediate_context.scissor_window = { pos.x, pos.y, size.width, size.height }; immediate_context.scissoring = true; }
+
 void immediate_flush()
 {
     auto& context = immediate_context;
@@ -145,6 +153,19 @@ void immediate_flush()
         glEnable( GL_CULL_FACE );
     else
         glDisable( GL_CULL_FACE );
+
+    if( immediate_context.scissoring )
+    {
+        glEnable( GL_SCISSOR_TEST );
+        glScissor((int)immediate_context.scissor_window.w, 
+                  (int)immediate_context.scissor_window.x, 
+                  (int)immediate_context.scissor_window.y,
+                  (int)immediate_context.scissor_window.z);
+    }
+    else
+    {
+        glDisable( GL_SCISSOR_TEST );
+    }
 
     if( immediate_context.alpha_blending )
     {
