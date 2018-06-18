@@ -354,8 +354,13 @@ void loop_dll( )
     if( appdata.app_state.debug_open )
     {
         ImGui::Begin( "Debug", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
-            if(ImGui::Button("Quit"))
-                appdata.app_state.running = false;
+
+            ImGui::ListBox( "Types: ", &appdata.app_state.type_list_current_item, [](void* data, int idx, const char** out_text) -> bool {
+                auto type_infos = (const TypeInfo**) data;
+                *out_text = type_infos[idx]->name;
+                return true;
+            }, appdata.metadata.type_infos.data(), (int)appdata.metadata.type_infos.size() );
+            if(ImGui::Button("Quit")) appdata.app_state.running = false;
         ImGui::End();
     }
 

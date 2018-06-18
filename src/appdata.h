@@ -81,6 +81,8 @@ struct AppState
 {
     bool debug_open = false;
     bool running = false;
+    
+    int type_list_current_item = 0;
 };
 
 struct Appdata
