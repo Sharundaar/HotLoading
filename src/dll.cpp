@@ -48,7 +48,7 @@ static void setup_opengl_attributes()
 static void setup_opengl_context( Appdata& appdata )
 {
     appdata.sdl_info.opengl_context = SDL_GL_CreateContext( appdata.sdl_info.window );
-    SDL_GL_SetSwapInterval( 1 );
+    SDL_GL_SetSwapInterval( 0 );
 
     // init GLAD AFTER the GL Context
     print("Initialing GLAD...");
@@ -286,6 +286,9 @@ void loop_dll( )
 {
     auto& appdata = get_dll_appdata();
 
+    appdata.app_state.global_timer.Tick();
+    appdata.app_state.global_frame_count++;
+
     SDL_Event evt;
     while( SDL_PollEvent( &evt ) )
     {
@@ -334,7 +337,7 @@ void loop_dll( )
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    io.DeltaTime = 1.0f/60.0f;
+    io.DeltaTime = (float) appdata.app_state.global_timer.Elapsed();
     io.MousePos = { appdata.input_state.mouse_position.x, appdata.input_state.mouse_position.y };
     io.MouseDown[0] = appdata.input_state.lmouse_down;
     io.MouseDown[1] = appdata.input_state.rmouse_down;
@@ -373,6 +376,10 @@ void loop_dll( )
                 *out_text = type_infos[idx]->name;
                 return true;
             }, appdata.metadata.type_infos.data(), (int)appdata.metadata.type_infos.size() );
+
+            ImGui::Text("Frame count: %i", appdata.app_state.global_frame_count);
+            ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
+
             if(ImGui::Button("Quit")) appdata.app_state.running = false;
         ImGui::End();
     }

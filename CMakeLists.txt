@@ -28,7 +28,7 @@ set(GLAD_SRC ${GLAD}/src/glad.c)
 set(IMGUI_SRC ${IMGUI}/imgui.cpp
               ${IMGUI}/imgui_demo.cpp
               ${IMGUI}/imgui_draw.cpp)
-set(COMMONSRC src/basics.cpp generated/type_db.cpp)
+set(COMMONSRC src/basics.cpp generated/type_db.cpp src/timer.cpp)
 
 set(LIBSRC ${COMMONSRC}
             ${IMGUI_SRC} 

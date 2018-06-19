@@ -12,6 +12,7 @@
 #include "shader.h"
 #include "mesh.h"
 #include "texture.h"
+#include "timer.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -79,12 +80,15 @@ struct TestData
 
 struct AppState
 {
-    bool debug_open = false;
-    bool demo_window_open = true;
+    bool debug_open = true;
+    bool demo_window_open = false;
 
     bool running = false;
     
     int type_list_current_item = 0;
+
+    Timer global_timer = {};
+    int   global_frame_count = 0;
 };
 
 struct Appdata
