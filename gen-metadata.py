@@ -6,7 +6,10 @@ import sys
 from termcolor import colored, cprint
 from shutil import copy2, move
 
-externals_path = os.environ['EXTERNALS']
+externals_path = "C:\\Home\\Workspace\\Externals";
+
+if 'EXTERNALS' in os.environ:
+    externals_path = os.environ['EXTERNALS']
 gen_metadata_exec_path = path.join( externals_path, 'GenMetadata\\gen-metadata.exe')
 sdl_header_path = path.join( externals_path, 'SDL2-2.0.5/include' )
 glad_header_path = path.join( externals_path, 'GLAD/include' )

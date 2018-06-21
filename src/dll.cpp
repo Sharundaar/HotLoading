@@ -377,6 +377,12 @@ void loop_dll( )
                 return true;
             }, appdata.metadata.type_infos.data(), (int)appdata.metadata.type_infos.size() );
 
+            if( appdata.app_state.type_list_current_item >= 0 && appdata.app_state.type_list_current_item < appdata.metadata.type_infos.size() )
+            {
+                auto selected_type = appdata.metadata.type_infos[ appdata.app_state.type_list_current_item ];
+                ImGui::SameLine(); ImGui::Text( "%s", selected_type->name );
+            }
+
             ImGui::Text("Frame count: %i", appdata.app_state.global_frame_count);
             ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
 
