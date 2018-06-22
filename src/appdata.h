@@ -64,6 +64,7 @@ struct InputState
     Vector2 mouse_position = {};
     bool lmouse_down = false;
     bool rmouse_down = false;
+    Vector2 mouse_wheel = {};
 };
 
 struct ImguiInfo

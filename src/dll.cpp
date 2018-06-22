@@ -289,6 +289,8 @@ void loop_dll( )
     appdata.app_state.global_timer.Tick();
     appdata.app_state.global_frame_count++;
 
+    appdata.input_state.mouse_wheel = {};
+
     SDL_Event evt;
     while( SDL_PollEvent( &evt ) )
     {
@@ -324,6 +326,10 @@ void loop_dll( )
                 }
                 break;
             }
+            case SDL_MOUSEWHEEL:
+                appdata.input_state.mouse_wheel.x = (float)evt.wheel.x;
+                appdata.input_state.mouse_wheel.y = (float)evt.wheel.y;
+                break;
             case SDL_MOUSEMOTION:
                 appdata.input_state.mouse_position.x = (float)evt.motion.x;
                 appdata.input_state.mouse_position.y = (float)evt.motion.y;
@@ -341,6 +347,8 @@ void loop_dll( )
     io.MousePos = { appdata.input_state.mouse_position.x, appdata.input_state.mouse_position.y };
     io.MouseDown[0] = appdata.input_state.lmouse_down;
     io.MouseDown[1] = appdata.input_state.rmouse_down;
+    io.MouseWheel = (float)appdata.input_state.mouse_wheel.y;
+    io.MouseWheelH = (float)appdata.input_state.mouse_wheel.x;
 
     ImGui::NewFrame();
 
