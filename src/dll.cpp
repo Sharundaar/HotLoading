@@ -184,6 +184,8 @@ static void init_imgui( Appdata& appdata )
     io.KeyMap[ImGuiKey_Y]          = IK_Y;
     io.KeyMap[ImGuiKey_Z]          = IK_Z;
 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
     appdata.imgui_info.texture = imgui_texture;
     appdata.imgui_info.shader = load_shader( "datas/shaders/imgui_shader.glsl" );
 }
@@ -368,7 +370,6 @@ void loop_dll( )
     if( appdata.input_state.is_key_down_this_frame(IK_F10) )
         appdata.app_state.demo_window_open = !appdata.app_state.demo_window_open;
 
-
     ImGui::NewFrame();
 
     glDisable( GL_SCISSOR_TEST );
@@ -397,18 +398,57 @@ void loop_dll( )
     if( appdata.app_state.debug_open )
     {
         ImGui::Begin( "Debug", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
-            ImGui::Text("Types: ");
-            ImGui::SameLine(); ImGui::ListBox( "", &appdata.app_state.type_list_current_item, [](void* data, int idx, const char** out_text) -> bool {
-                auto type_infos = (const TypeInfo**) data;
-                *out_text = type_infos[idx]->name;
-                return true;
-            }, appdata.metadata.type_infos.data(), (int)appdata.metadata.type_infos.size() );
+            const float child_height = 146.0f;
+            ImGui::BeginChild( "Types", ImVec2( 0.5f * ImGui::GetWindowWidth(), child_height ) );
+                ImGui::Text( "Types: " );
+                auto get_selected_type_lambda = [](void* data, int idx, const char** out_text) -> bool {
+                    auto type_infos = (const TypeInfo**) data;
+                    *out_text = type_infos[idx]->name;
+                    return true;
+                };
+                ImGui::PushItemWidth(-1);
+                ImGui::ListBox( "##empty", &appdata.app_state.type_list_current_item, get_selected_type_lambda, appdata.metadata.type_infos.data(), (int)appdata.metadata.type_infos.size() );
+            ImGui::EndChild();
+            ImGui::SameLine();
+            ImGui::BeginChild( "TypeData", ImVec2( 0.5f * ImGui::GetWindowWidth(), child_height ) );
+                if( appdata.app_state.type_list_current_item >= 0 && appdata.app_state.type_list_current_item < appdata.metadata.type_infos.size() )
+                {
+                    auto selected_type = appdata.metadata.type_infos[ appdata.app_state.type_list_current_item ];
+                    auto type_name = appdata.metadata.type_infos[type_id<TypeInfoType>().local_type]->enum_info.enum_values[(int)selected_type->type].name;
+                    ImGui::Text( "%s %s", type_name, selected_type->name );
+                    switch( selected_type->type )
+                    {
+                        case TypeInfoType::Enum:
+                        {
+                            ImGui::Text( "    underlying_type: %s", selected_type->enum_info.underlying_type ? selected_type->enum_info.underlying_type->name : "(unknown)" );
+                            ImGui::BeginChild( "EnumValues", ImVec2( -36 , 0), true );
+                                for( uint enum_idx = 0; enum_idx < selected_type->enum_info.enum_value_count; ++enum_idx )
+                                    ImGui::Text( "%i: %s", selected_type->enum_info.enum_values[enum_idx].value, selected_type->enum_info.enum_values[enum_idx].name );
+                            ImGui::EndChild();
+                            break;
+                        }
+                        case TypeInfoType::Function:
+                            break;
+                        case TypeInfoType::Scalar:
+                        {
+                            const auto& scalar_info = selected_type->scalar_info;
+                            auto scalar_type_name = appdata.metadata.type_infos[type_id<ScalarInfoType>().local_type]->enum_info.enum_values[(int)scalar_info.scalar_type].name;
+                            ImGui::Text("    kind: %s", scalar_type_name);
+                            ImGui::Text("    size: %i", scalar_info.size);
+                            break;
+                        }
+                        case TypeInfoType::Struct:
+                            break;
+                        case TypeInfoType::TemplateDef:
+                            break;
+                        case TypeInfoType::Typedef:
+                            break;
+                        default:
+                            break;
+                    }
 
-            if( appdata.app_state.type_list_current_item >= 0 && appdata.app_state.type_list_current_item < appdata.metadata.type_infos.size() )
-            {
-                auto selected_type = appdata.metadata.type_infos[ appdata.app_state.type_list_current_item ];
-                ImGui::SameLine(); ImGui::Text( "%s", selected_type->name );
-            }
+                }
+            ImGui::EndChild();
 
             ImGui::Text("Frame count: %i", appdata.app_state.global_frame_count);
             ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
