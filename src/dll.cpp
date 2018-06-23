@@ -438,11 +438,24 @@ void loop_dll( )
                             break;
                         }
                         case TypeInfoType::Struct:
+                        {
+                            const auto& struct_info = selected_type->struct_info;
+                            ImGui::Text("    parent: %s", struct_info.parent ? struct_info.parent->name : "null");
+                            ImGui::Text("    size: %i", struct_info.size);
+                            ImGui::BeginChild( "StructFields", ImVec2( -36, 0 ), true );
+                                for( uint field_idx = 0; field_idx < struct_info.field_count; ++field_idx )
+                                    ImGui::Text( "%s%s%s %s", struct_info.fields[field_idx].modifier & FieldInfoModifier::CONSTANT ? "const " : "", struct_info.fields[field_idx].type ? struct_info.fields[field_idx].type->name : "(unknown)", struct_info.fields[field_idx].modifier & FieldInfoModifier::POINTER ? "*" : "", struct_info.fields[field_idx].name );
+                            ImGui::EndChild();
                             break;
+                        }
                         case TypeInfoType::TemplateDef:
                             break;
                         case TypeInfoType::Typedef:
+                        {
+                            const auto& typedef_info = selected_type->typedef_info;
+                            ImGui::Text("    base: %s%s%s", typedef_info.info.modifier & FieldInfoModifier::CONSTANT ? "const " : "", typedef_info.info.type ? typedef_info.info.type->name : "(unknown)", typedef_info.info.modifier & FieldInfoModifier::POINTER ? "*" : "");
                             break;
+                        }
                         default:
                             break;
                     }
