@@ -162,6 +162,27 @@ static void init_imgui( Appdata& appdata )
     imgui_texture->channels = 4;
     upload_texture( imgui_texture );
     io.Fonts->TexID = (void*)imgui_texture;
+    io.KeyMap[ImGuiKey_Tab]        = IK_TAB;
+    io.KeyMap[ImGuiKey_LeftArrow]  = IK_LEFTARROW;
+    io.KeyMap[ImGuiKey_RightArrow] = IK_RIGHTARROW;
+    io.KeyMap[ImGuiKey_UpArrow]    = IK_UPARROW;
+    io.KeyMap[ImGuiKey_DownArrow]  = IK_DOWNARROW;
+    io.KeyMap[ImGuiKey_PageUp]     = IK_PAGEUP;
+    io.KeyMap[ImGuiKey_PageDown]   = IK_PAGEDOWN;
+    io.KeyMap[ImGuiKey_Home]       = IK_HOME;
+    io.KeyMap[ImGuiKey_End]        = IK_END;
+    io.KeyMap[ImGuiKey_Insert]     = IK_INSERT;
+    io.KeyMap[ImGuiKey_Delete]     = IK_DELETE;
+    io.KeyMap[ImGuiKey_Backspace]  = IK_BACKSPACE;
+    io.KeyMap[ImGuiKey_Space]      = IK_SPACE;
+    io.KeyMap[ImGuiKey_Enter]      = IK_ENTER;
+    io.KeyMap[ImGuiKey_Escape]     = IK_ESCAPE;
+    io.KeyMap[ImGuiKey_A]          = IK_A;
+    io.KeyMap[ImGuiKey_C]          = IK_C;
+    io.KeyMap[ImGuiKey_V]          = IK_V;
+    io.KeyMap[ImGuiKey_X]          = IK_X;
+    io.KeyMap[ImGuiKey_Y]          = IK_Y;
+    io.KeyMap[ImGuiKey_Z]          = IK_Z;
 
     appdata.imgui_info.texture = imgui_texture;
     appdata.imgui_info.shader = load_shader( "datas/shaders/imgui_shader.glsl" );
@@ -319,9 +340,26 @@ void loop_dll( )
     io.MousePos = { appdata.input_state.mouse_position.x, appdata.input_state.mouse_position.y };
     for(int i=0; i<5; ++i)
         io.MouseDown[i] = appdata.input_state.is_key_down((InputKey)(IK_MOUSE1+i));
+    for(int i=0; i<IK_COUNT; ++i)
+        io.KeysDown[i] = appdata.input_state.is_key_down( (InputKey)i );
+    io.KeyAlt = appdata.input_state.is_key_down( IK_LALT ) || appdata.input_state.is_key_down( IK_RALT );
+    io.KeyCtrl = appdata.input_state.is_key_down( IK_LCTRL ) || appdata.input_state.is_key_down( IK_RCTRL );
+    io.KeyShift = appdata.input_state.is_key_down( IK_LSHIFT ) || appdata.input_state.is_key_down( IK_RSHIFT );
 
     io.MouseWheel = (float)appdata.input_state.mouse_wheel.y;
     io.MouseWheelH = (float)appdata.input_state.mouse_wheel.x;
+
+    for( int i=IK_A; i<=IK_Z; ++i )
+    {
+        if( appdata.input_state.is_key_down_this_frame_or_repeat( (InputKey)i ) )
+            io.AddInputCharacter( (char) i-IK_A + 'a' );
+    }
+
+    for( int i=IK_0; i<=IK_9; ++i )
+    {
+        if( appdata.input_state.is_key_down_this_frame_or_repeat( (InputKey)i ) )
+            io.AddInputCharacter( (char) i-IK_0 + '0' );
+    }
 
     if( appdata.input_state.is_key_down_this_frame(IK_ESCAPE) )
         appdata.app_state.running = false;

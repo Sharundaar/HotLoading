@@ -83,19 +83,19 @@ InputKey sdlscancode_to_inputkey_map[SDL_NUM_SCANCODES] = {
     IK_F11,  //SDL_SCANCODE_F11
     IK_F12,  //SDL_SCANCODE_F12
 
-    IK_UNKNOWN, //     SDL_SCANCODE_PRINTSCREEN
-    IK_UNKNOWN, //     SDL_SCANCODE_SCROLLLOCK
-    IK_UNKNOWN, //     SDL_SCANCODE_PAUSE
-    IK_UNKNOWN, //     SDL_SCANCODE_INSERT
-    IK_UNKNOWN, //     SDL_SCANCODE_HOME
-    IK_UNKNOWN, //     SDL_SCANCODE_PAGEUP
-    IK_UNKNOWN, //     SDL_SCANCODE_DELETE
-    IK_UNKNOWN, //     SDL_SCANCODE_END
-    IK_UNKNOWN, //     SDL_SCANCODE_PAGEDOWN
-    IK_UNKNOWN, //     SDL_SCANCODE_RIGHT
-    IK_UNKNOWN, //     SDL_SCANCODE_LEFT
-    IK_UNKNOWN, //     SDL_SCANCODE_DOWN
-    IK_UNKNOWN, //     SDL_SCANCODE_UP
+    IK_UNKNOWN,  //     SDL_SCANCODE_PRINTSCREEN
+    IK_UNKNOWN,  //     SDL_SCANCODE_SCROLLLOCK
+    IK_UNKNOWN,  //     SDL_SCANCODE_PAUSE
+    IK_INSERT,   //     SDL_SCANCODE_INSERT
+    IK_HOME,     //     SDL_SCANCODE_HOME
+    IK_PAGEUP,   //     SDL_SCANCODE_PAGEUP
+    IK_DELETE,   //     SDL_SCANCODE_DELETE
+    IK_END,      //     SDL_SCANCODE_END
+    IK_PAGEDOWN, //     SDL_SCANCODE_PAGEDOWN
+    IK_RIGHTARROW, //     SDL_SCANCODE_RIGHT
+    IK_LEFTARROW,  //     SDL_SCANCODE_LEFT
+    IK_DOWNARROW,  //     SDL_SCANCODE_DOWN
+    IK_UPARROW,    //     SDL_SCANCODE_UP
 
     IK_UNKNOWN, //     SDL_SCANCODE_NUMLOCKCLEAR
     IK_UNKNOWN, //     SDL_SCANCODE_KP_DIVIDE
@@ -183,6 +183,18 @@ InputKey sdlscancode_to_inputkey_map[SDL_NUM_SCANCODES] = {
     IK_UNKNOWN, //     SDL_SCANCODE_CRSEL
     IK_UNKNOWN, //     SDL_SCANCODE_EXSEL
 
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+
     IK_UNKNOWN, //     SDL_SCANCODE_KP_00
     IK_UNKNOWN, //     SDL_SCANCODE_KP_000
     IK_UNKNOWN, //     SDL_SCANCODE_THOUSANDSSEPARATOR
@@ -230,6 +242,9 @@ InputKey sdlscancode_to_inputkey_map[SDL_NUM_SCANCODES] = {
     IK_UNKNOWN, //     SDL_SCANCODE_KP_DECIMAL
     IK_UNKNOWN, //     SDL_SCANCODE_KP_HEXADECIMAL
 
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+
     IK_LCTRL,   // SDL_SCANCODE_LCTRL
     IK_LSHIFT,  // SDL_SCANCODE_LSHIFT
     IK_LALT,    // SDL_SCANCODE_LALT
@@ -238,6 +253,33 @@ InputKey sdlscancode_to_inputkey_map[SDL_NUM_SCANCODES] = {
     IK_RSHIFT,  // SDL_SCANCODE_RSHIFT
     IK_RALT,    // SDL_SCANCODE_RALT
     IK_UNKNOWN, // SDL_SCANCODE_RGUI
+
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
+    IK_UNKNOWN, // UNKNOWN
 
     IK_UNKNOWN, //     SDL_SCANCODE_MODE
 
@@ -291,10 +333,13 @@ bool handle_inputs( InputState& input_state, const SDL_Event& evt )
         case SDL_KEYUP:
         {
             auto key = get_inputkey_from_sdl_scancode( evt.key.keysym.scancode );
-            if( key != IK_UNKNOWN && evt.key.repeat == 0 )
+            if( key != IK_UNKNOWN )
             {
                 input_state.key_down[key] = evt.key.state == SDL_PRESSED;
-                input_state.key_change[key] = true;
+                if( evt.key.repeat == 0 )
+                    input_state.key_change[key] = true;
+                else
+                    input_state.key_repeat[key] = true;
             }
             break;
         }
@@ -365,7 +410,13 @@ bool InputState::is_key_up_this_frame( InputKey key )
     return key_change[key] && !key_down[key];
 }
 
+bool InputState::is_key_down_this_frame_or_repeat( InputKey key )
+{
+    return is_key_down_this_frame( key ) || key_repeat[key];
+}
+
 void InputState::frame_start()
 {
     memset( key_change, 0, sizeof(bool)*IK_COUNT );
+    memset( key_repeat, 0, sizeof(bool)*IK_COUNT );
 }

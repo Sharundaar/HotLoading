@@ -65,6 +65,18 @@ enum InputKey
     IK_RCTRL,
     IK_RALT,
 
+    IK_LEFTARROW,
+    IK_UPARROW,
+    IK_RIGHTARROW,
+    IK_DOWNARROW,
+
+    IK_HOME,
+    IK_END,
+    IK_INSERT,
+    IK_DELETE,
+    IK_PAGEUP,
+    IK_PAGEDOWN,
+
     IK_SPACE,
     IK_ESCAPE,
     IK_ENTER,
@@ -87,11 +99,13 @@ struct InputState
 
     bool key_down[IK_COUNT];
     bool key_change[IK_COUNT];
+    bool key_repeat[IK_COUNT];
 
     bool is_key_down( InputKey key );
     bool is_key_up( InputKey key );
     bool is_key_down_this_frame( InputKey key );
     bool is_key_up_this_frame( InputKey key );
+    bool is_key_down_this_frame_or_repeat( InputKey key );
 
     void frame_start();
 };
