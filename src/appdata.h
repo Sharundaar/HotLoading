@@ -13,6 +13,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "timer.h"
+#include "input_state.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -57,14 +58,6 @@ struct GlobalStore
     MemoryPool<MaterialDef>    material_pool = {};
     MemoryPool<MeshDef>        mesh_pool = {};
     MemoryPool<Texture>        texture_pool = {};
-};
-
-struct InputState
-{
-    Vector2 mouse_position = {};
-    bool lmouse_down = false;
-    bool rmouse_down = false;
-    Vector2 mouse_wheel = {};
 };
 
 struct ImguiInfo

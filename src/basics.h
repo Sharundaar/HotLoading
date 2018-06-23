@@ -41,7 +41,6 @@ const char* format(const char* fmt, std::string& out, const T& val)
     if(*ptr == '\0') return ptr;
     format(out, val);
     ++ptr;
-    while(*ptr != '\0') out += *(ptr++); // dump the rest of the string
     return ptr;
 }
 

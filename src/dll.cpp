@@ -188,6 +188,7 @@ void reload_dll()
     init_immediate();
     reload_metadata( appdata );
     report_types( appdata );
+    init_input_state( appdata.input_state );
 }
 
 void unload_dll( bool last_time )
@@ -282,6 +283,27 @@ static void render_imgui_data( const ImDrawData* draw_data )
 
 }
 
+void handle_events( InputState& input_state, AppState& app_state )
+{
+    input_state.mouse_wheel = {};
+
+    SDL_Event evt;
+    while( SDL_PollEvent( &evt ) )
+    {
+        if( handle_inputs( input_state, evt ) )
+            continue;
+
+        switch( evt.type )
+        {
+            case SDL_QUIT:
+                app_state.running = false;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void loop_dll( )
 {
     auto& appdata = get_dll_appdata();
@@ -289,66 +311,25 @@ void loop_dll( )
     appdata.app_state.global_timer.Tick();
     appdata.app_state.global_frame_count++;
 
-    appdata.input_state.mouse_wheel = {};
-
-    SDL_Event evt;
-    while( SDL_PollEvent( &evt ) )
-    {
-        switch( evt.type )
-        {
-            case SDL_KEYDOWN:
-            {
-                switch( evt.key.keysym.sym )
-                {
-                    case SDLK_ESCAPE:
-                        appdata.app_state.running = false;
-                        break;
-                    case SDLK_F11:
-                        appdata.app_state.debug_open = !appdata.app_state.debug_open;
-                        break;
-                    case SDLK_F10:
-                        appdata.app_state.demo_window_open = !appdata.app_state.demo_window_open;
-                        break;
-                }
-                break;
-            }
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-            {
-                switch(evt.button.button)
-                {
-                    case SDL_BUTTON_LEFT:
-                        appdata.input_state.lmouse_down = evt.button.state == SDL_PRESSED;
-                        break;
-                    case SDL_BUTTON_RIGHT:
-                        appdata.input_state.rmouse_down = evt.button.state == SDL_PRESSED;
-                        break;
-                }
-                break;
-            }
-            case SDL_MOUSEWHEEL:
-                appdata.input_state.mouse_wheel.x = (float)evt.wheel.x;
-                appdata.input_state.mouse_wheel.y = (float)evt.wheel.y;
-                break;
-            case SDL_MOUSEMOTION:
-                appdata.input_state.mouse_position.x = (float)evt.motion.x;
-                appdata.input_state.mouse_position.y = (float)evt.motion.y;
-                break;
-            case SDL_QUIT:
-                appdata.app_state.running = false;
-                break;
-            default:
-                break;
-        }
-    }
+    appdata.input_state.frame_start();
+    handle_events( appdata.input_state, appdata.app_state );
 
     ImGuiIO& io = ImGui::GetIO();
     io.DeltaTime = (float) appdata.app_state.global_timer.Elapsed();
     io.MousePos = { appdata.input_state.mouse_position.x, appdata.input_state.mouse_position.y };
-    io.MouseDown[0] = appdata.input_state.lmouse_down;
-    io.MouseDown[1] = appdata.input_state.rmouse_down;
+    for(int i=0; i<5; ++i)
+        io.MouseDown[i] = appdata.input_state.is_key_down((InputKey)(IK_MOUSE1+i));
+
     io.MouseWheel = (float)appdata.input_state.mouse_wheel.y;
     io.MouseWheelH = (float)appdata.input_state.mouse_wheel.x;
+
+    if( appdata.input_state.is_key_down_this_frame(IK_ESCAPE) )
+        appdata.app_state.running = false;
+    if( appdata.input_state.is_key_down_this_frame(IK_F9) )
+        appdata.app_state.debug_open = !appdata.app_state.debug_open;
+    if( appdata.input_state.is_key_down_this_frame(IK_F10) )
+        appdata.app_state.demo_window_open = !appdata.app_state.demo_window_open;
+
 
     ImGui::NewFrame();
 

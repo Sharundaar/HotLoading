@@ -39,7 +39,8 @@ set(LIBSRC ${COMMONSRC}
             src/shader.cpp
             src/mesh.cpp
             src/texture.cpp
-            src/immediate_mode.cpp )
+            src/immediate_mode.cpp
+            src/input_state.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )
