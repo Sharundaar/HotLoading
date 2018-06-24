@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <glad/glad.h>
 #include <imgui.h>
+#include <string>
 
 #include "basics.h"
 
@@ -124,8 +125,8 @@ static void reload_metadata( Appdata& appdata )
     for( u32 type_idx=0; type_idx < (u32)LocalTypeId::COUNT; ++type_idx)
     {
         auto type = &type_array[type_idx];
-        if( type->type_id.local_type != INVALID_TYPE_ID )
-            appdata.metadata.type_infos[type->type_id.local_type] = type;
+        if( type->type_id != INVALID_TYPE_ID )
+            appdata.metadata.type_infos[type->type_id] = type;
     }
 }
 
@@ -327,6 +328,7 @@ void handle_events( InputState& input_state, AppState& app_state )
     }
 }
 
+static std::string string_buf;
 void loop_dll( )
 {
     auto& appdata = get_dll_appdata();
@@ -399,7 +401,7 @@ void loop_dll( )
     {
         ImGui::Begin( "Debug", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
             const float child_height = 146.0f;
-            ImGui::BeginChild( "Types", ImVec2( 0.5f * ImGui::GetWindowWidth(), child_height ) );
+            ImGui::BeginChild( "Types", ImVec2( 0.30f * ImGui::GetWindowWidth(), child_height ) );
                 ImGui::Text( "Types: " );
                 auto get_selected_type_lambda = [](void* data, int idx, const char** out_text) -> bool {
                     auto type_infos = (const TypeInfo**) data;
@@ -410,11 +412,11 @@ void loop_dll( )
                 ImGui::ListBox( "##empty", &appdata.app_state.type_list_current_item, get_selected_type_lambda, appdata.metadata.type_infos.data(), (int)appdata.metadata.type_infos.size() );
             ImGui::EndChild();
             ImGui::SameLine();
-            ImGui::BeginChild( "TypeData", ImVec2( 0.5f * ImGui::GetWindowWidth(), child_height ) );
+            ImGui::BeginChild( "TypeData", ImVec2( 0, child_height ) );
                 if( appdata.app_state.type_list_current_item >= 0 && appdata.app_state.type_list_current_item < appdata.metadata.type_infos.size() )
                 {
                     auto selected_type = appdata.metadata.type_infos[ appdata.app_state.type_list_current_item ];
-                    auto type_name = appdata.metadata.type_infos[type_id<TypeInfoType>().local_type]->enum_info.enum_values[(int)selected_type->type].name;
+                    auto type_name = appdata.metadata.type_infos[type_id<TypeInfoType>()]->enum_info.enum_values[(int)selected_type->type].name;
                     ImGui::Text( "%s %s", type_name, selected_type->name );
                     switch( selected_type->type )
                     {
@@ -432,7 +434,7 @@ void loop_dll( )
                         case TypeInfoType::Scalar:
                         {
                             const auto& scalar_info = selected_type->scalar_info;
-                            auto scalar_type_name = appdata.metadata.type_infos[type_id<ScalarInfoType>().local_type]->enum_info.enum_values[(int)scalar_info.scalar_type].name;
+                            auto scalar_type_name = appdata.metadata.type_infos[type_id<ScalarInfoType>()]->enum_info.enum_values[(int)scalar_info.scalar_type].name;
                             ImGui::Text("    kind: %s", scalar_type_name);
                             ImGui::Text("    size: %i", scalar_info.size);
                             break;
@@ -449,7 +451,21 @@ void loop_dll( )
                             break;
                         }
                         case TypeInfoType::TemplateDef:
+                        {
+                            const auto& templatedef_info = selected_type->template_def_info;
+                            ImGui::Text("instances: ");
+                            ImGui::BeginChild( "TemplateInstances", ImVec2( -36, 0 ), true );
+                                for( uint instance_idx = 0; instance_idx < templatedef_info.instance_count ; ++instance_idx )
+                                {
+                                    const TemplateInstInfo& inst = templatedef_info.instances[instance_idx];
+                                    string_buf.clear();
+                                    for( uint param_idx = 0; param_idx < inst.param_count; ++param_idx )
+                                        string_buf += inst.params[param_idx].info.type ? inst.params[param_idx].info.type->name : "(unknown) ";
+                                    ImGui::Text( "%s", string_buf.c_str() );
+                                }
+                            ImGui::EndChild();
                             break;
+                        }
                         case TypeInfoType::Typedef:
                         {
                             const auto& typedef_info = selected_type->typedef_info;
@@ -479,5 +495,5 @@ void loop_dll( )
     SDL_GL_SwapWindow( appdata.sdl_info.window );
 }
 
- const TypeInfo* Object::get_type() const { return get_dll_appdata().metadata.type_infos[m_type_id.local_type]; }
+ const TypeInfo* Object::get_type() const { return get_dll_appdata().metadata.type_infos[m_type_id]; }
  
