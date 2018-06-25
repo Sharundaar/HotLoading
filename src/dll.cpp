@@ -353,26 +353,22 @@ void loop_dll( )
     io.MouseWheel = (float)appdata.input_state.mouse_wheel.y;
     io.MouseWheelH = (float)appdata.input_state.mouse_wheel.x;
 
-    for( int i=IK_A; i<=IK_Z; ++i )
+    if( !io.WantCaptureKeyboard )
     {
-        if( appdata.input_state.is_key_down_this_frame_or_repeat( (InputKey)i ) )
-            io.AddInputCharacter( (char) i-IK_A + 'a' );
+        if( appdata.input_state.is_key_down_this_frame(IK_ESCAPE) )
+            appdata.app_state.running = false;
     }
-
-    for( int i=IK_0; i<=IK_9; ++i )
-    {
-        if( appdata.input_state.is_key_down_this_frame_or_repeat( (InputKey)i ) )
-            io.AddInputCharacter( (char) i-IK_0 + '0' );
-    }
-
-    if( appdata.input_state.is_key_down_this_frame(IK_ESCAPE) )
-        appdata.app_state.running = false;
+    
     if( appdata.input_state.is_key_down_this_frame(IK_F9) )
         appdata.app_state.debug_open = !appdata.app_state.debug_open;
     if( appdata.input_state.is_key_down_this_frame(IK_F10) )
         appdata.app_state.demo_window_open = !appdata.app_state.demo_window_open;
 
     ImGui::NewFrame();
+
+    appdata.input_state.enable_text_input( io.WantTextInput );
+    if( appdata.input_state.input_char_ready )
+        io.AddInputCharactersUTF8( appdata.input_state.input_chars );
 
     glDisable( GL_SCISSOR_TEST );
 

@@ -377,6 +377,10 @@ bool handle_inputs( InputState& input_state, const SDL_Event& evt )
             input_state.mouse_position.x = (float)evt.motion.x;
             input_state.mouse_position.y = (float)evt.motion.y;
             break;
+        case SDL_TEXTINPUT:
+            memcpy( input_state.input_chars, evt.text.text, 32 * sizeof(char) );
+            input_state.input_char_ready = true;
+            break;
         default:
             return false;
             break;
@@ -415,8 +419,24 @@ bool InputState::is_key_down_this_frame_or_repeat( InputKey key )
     return is_key_down_this_frame( key ) || key_repeat[key];
 }
 
+void InputState::enable_text_input( bool enabled )
+{
+    if( enabled != input_text_enabled )
+    {
+        input_text_enabled = enabled;
+        if( input_text_enabled )
+            SDL_StartTextInput();
+        else
+            SDL_StopTextInput();
+        
+        memset( input_chars, 0, sizeof( input_chars ) );
+        input_char_ready = false;
+    }
+}
+
 void InputState::frame_start()
 {
     memset( key_change, 0, sizeof(bool)*IK_COUNT );
     memset( key_repeat, 0, sizeof(bool)*IK_COUNT );
+    input_char_ready = false;
 }

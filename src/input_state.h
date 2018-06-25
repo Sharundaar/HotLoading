@@ -97,15 +97,21 @@ struct InputState
     Vector2 mouse_position = {};
     Vector2 mouse_wheel = {};
 
-    bool key_down[IK_COUNT];
-    bool key_change[IK_COUNT];
-    bool key_repeat[IK_COUNT];
+    bool key_down[IK_COUNT]   = {};
+    bool key_change[IK_COUNT] = {};
+    bool key_repeat[IK_COUNT] = {};
+
+    bool input_text_enabled = false;
+    bool input_char_ready = false;
+    char input_chars[128];
 
     bool is_key_down( InputKey key );
     bool is_key_up( InputKey key );
     bool is_key_down_this_frame( InputKey key );
     bool is_key_up_this_frame( InputKey key );
     bool is_key_down_this_frame_or_repeat( InputKey key );
+
+    void enable_text_input( bool enabled );
 
     void frame_start();
 };
