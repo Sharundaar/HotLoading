@@ -14,7 +14,7 @@ gen_metadata_exec_path = path.join( externals_path, 'GenMetadata\\gen-metadata.e
 sdl_header_path = path.join( externals_path, 'SDL2-2.0.5/include' )
 glad_header_path = path.join( externals_path, 'GLAD/include' )
 genmetadata_header_path = path.join( externals_path, 'GenMetadata/include' )
-gen_metadata_command = '{} --no-report src {} -i generated -i {} -i {} --output generated'.format( gen_metadata_exec_path, genmetadata_header_path, sdl_header_path, glad_header_path )
+gen_metadata_command = '{} --no-report src mathlib {} -i generated -i {} -i {} --output generated'.format( gen_metadata_exec_path, genmetadata_header_path, sdl_header_path, glad_header_path )
 expected_outputs = [ 'generated/type_db.cpp', 'generated/type_db.h' ]
 cleanup = [ 'main.h' ]
 

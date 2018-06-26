@@ -9,6 +9,8 @@
 #define assert_fmt(Condition, Message, ...) assert(Condition, format(Message, ##__VA_ARGS__))
 bool _assert(bool condition, const std::string& msg = "");
 
+#define unimplemented() assert( false, "unimplemented" )
+
 #define HAS_FLAG( var, flag ) ((var & flag) == flag )
 
 template<typename T>

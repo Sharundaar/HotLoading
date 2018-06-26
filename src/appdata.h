@@ -62,7 +62,7 @@ struct GlobalStore
 
 struct ImguiInfo
 {
-    Texture* texture = {};
+    Texture* texture = nullptr;
     Shader* shader  = nullptr;
 };
 
@@ -76,6 +76,7 @@ struct AppState
 {
     bool debug_open = true;
     bool demo_window_open = false;
+    bool inspector_open = false;
 
     bool running = false;
     

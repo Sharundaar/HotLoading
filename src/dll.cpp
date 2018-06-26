@@ -112,7 +112,7 @@ static void reload_metadata( Appdata& appdata )
 
     if( current_allocator->data_capacity == 0 )
     {
-        const size_t capacity = 0x7000; // @TODO: Allocate according to generated information
+        const size_t capacity = 0x10000; // @TODO: Allocate according to generated information
         current_allocator->data_buffer   = new uint8_t[capacity];
         current_allocator->data_capacity = capacity; 
     }
@@ -328,6 +328,151 @@ void handle_events( InputState& input_state, AppState& app_state )
     }
 }
 
+void draw_scalar_inspector( const char* name, const TypeInfo* type, u8* data )
+{
+    assert( type && type->type == TypeInfoType::Scalar, "type is not a scalar type." );
+
+    const ScalarInfo& scalar_info = type->scalar_info;
+
+    switch( scalar_info.scalar_type )
+    {
+        case ScalarInfoType::BOOL:
+        {
+            bool* data_bool = reinterpret_cast<bool*>(data);
+            ImGui::Checkbox( name, data_bool );
+            break;
+        }
+        case ScalarInfoType::FLOAT:
+        {
+            if( scalar_info.size == sizeof( f32 ) )
+            {
+                f32* data_float = reinterpret_cast<f32*>(data);
+                ImGui::InputFloat( name, data_float, 0.1f, 1.0f, 3 );
+            }
+            else if( scalar_info.size == sizeof( f64 ) )
+            {
+                f64* data_float = reinterpret_cast<f64*>(data);
+                ImGui::InputDouble( name, data_float, 0.1, 1.0 );
+            }
+            else
+            {
+                assert( false, "Only handling float and double edit." );
+            }
+            break;
+        }
+        case ScalarInfoType::CHAR:
+        {
+            unimplemented();
+            break;
+        }
+        case ScalarInfoType::INT:
+        {
+            switch( scalar_info.size )
+            {
+                case sizeof(i8):
+                {
+                    i8* data_int = reinterpret_cast<i8*>( data );
+                    i64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_S64, &temp ) )
+                        *data_int = (i8) temp;
+                    break;
+                }
+                case sizeof(i16):
+                {
+                    i16* data_int = reinterpret_cast<i16*>( data );
+                    i64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_S64, &temp ) )
+                        *data_int = (i16) temp;
+                    break;
+                }
+                case sizeof(i32):
+                {
+                    i32* data_int = reinterpret_cast<i32*>( data );
+                    i64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_S64, &temp ) )
+                        *data_int = (i32) temp;
+                    break;
+                }
+                case sizeof(i64):
+                {
+                    i64* data_int = reinterpret_cast<i64*>( data );
+                    i64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_S64, &temp ) )
+                        *data_int = (i64) temp;
+                    break;
+                }
+                default:
+                    assert( false, "Only handling i8, i16, i32 or i64." );
+                    break;
+            }
+            break;
+        }
+        case ScalarInfoType::UINT:
+        {
+            switch( scalar_info.size )
+            {
+                case sizeof(u8):
+                {
+                    u8* data_int = reinterpret_cast<u8*>( data );
+                    u64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_U64, &temp ) )
+                        *data_int = (u8) temp;
+                    break;
+                }
+                case sizeof(u16):
+                {
+                    u16* data_int = reinterpret_cast<u16*>( data );
+                    u64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_U64, &temp ) )
+                        *data_int = (u16) temp;
+                    break;
+                }
+                case sizeof(u32):
+                {
+                    u32* data_int = reinterpret_cast<u32*>( data );
+                    u64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_U64, &temp ) )
+                        *data_int = (u32) temp;
+                    break;
+                }
+                case sizeof(u64):
+                {
+                    u64* data_int = reinterpret_cast<u64*>( data );
+                    u64 temp = *data_int;
+                    if( ImGui::InputScalar( name, ImGuiDataType_U64, &temp ) )
+                        *data_int = (u64) temp;
+                    break;
+                }
+                default:
+                    assert( false, "Only handling u8, u16, u32 or u64." );
+                    break;
+            }
+            break;
+        }
+        default:
+            unimplemented();
+            break;
+
+    }
+
+}
+
+void draw_data_inspector( Appdata& appdata, const TypeInfo* type, u8* data )
+{
+    assert( type && type->type == TypeInfoType::Struct, "Only handling struct type in the inspector." );
+
+    const StructInfo& struct_info = type->struct_info;
+    for( uint i=0; i<struct_info.field_count; ++i )
+    {
+        const auto& field = struct_info.fields[i];
+        if( field.type && field.type->type == TypeInfoType::Scalar )
+            draw_scalar_inspector( field.name, field.type, data + field.offset );
+        else
+            ImGui::Text( "%s %s", field.type ? field.type->name : "(unknown)", field.name );
+    }
+}
+
+
 static std::string string_buf;
 void loop_dll( )
 {
@@ -358,11 +503,13 @@ void loop_dll( )
         if( appdata.input_state.is_key_down_this_frame(IK_ESCAPE) )
             appdata.app_state.running = false;
     }
-    
+
     if( appdata.input_state.is_key_down_this_frame(IK_F9) )
         appdata.app_state.debug_open = !appdata.app_state.debug_open;
     if( appdata.input_state.is_key_down_this_frame(IK_F10) )
         appdata.app_state.demo_window_open = !appdata.app_state.demo_window_open;
+    if( appdata.input_state.is_key_down_this_frame(IK_F11) )
+        appdata.app_state.inspector_open = !appdata.app_state.inspector_open;
 
     ImGui::NewFrame();
 
@@ -479,6 +626,14 @@ void loop_dll( )
             ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
 
             if(ImGui::Button("Quit")) appdata.app_state.running = false;
+        ImGui::End();
+    }
+
+    if( appdata.app_state.inspector_open )
+    {
+        ImGui::Begin( "Inspector", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
+            const TypeInfo* appstate_type = appdata.metadata.type_infos[ type_id(appdata.app_state) ];
+            draw_data_inspector( appdata, appstate_type, reinterpret_cast<u8*>(&appdata.app_state) );
         ImGui::End();
     }
 
