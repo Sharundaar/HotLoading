@@ -87,10 +87,9 @@ char* extract_shader_name( const char* file, char* buffer, uint buffer_length )
     return buffer;
 }
 
-Shader* get_shader( const char* source_file )
+static Shader* get_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
 {
-    auto& appdata = get_dll_appdata();
-    for(auto shader : appdata.global_store.shader_pool)
+    for(auto shader : shader_pool)
     {
         if( shader->source->file == source_file )
             return shader;
@@ -98,10 +97,10 @@ Shader* get_shader( const char* source_file )
     return nullptr;
 }
 
-Shader* load_shader( const char* source_file )
+Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
 {
     {
-        auto shader = get_shader( source_file );
+        auto shader = get_shader( shader_pool, source_file );
         if( shader ) return shader;
     }
 
@@ -204,7 +203,7 @@ Shader* load_shader( const char* source_file )
         return false;
     }
 
-    auto shader = get_dll_appdata().global_store.shader_pool.Instantiate();
+    auto shader = shader_pool.Instantiate();
     assert( shader != nullptr, "Allocation error." );
 
     char shader_name[512];

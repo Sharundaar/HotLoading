@@ -2,6 +2,7 @@
 
 #include "resource.h"
 #include "mathlib.h"
+#include "memory_pool.h"
 
 struct Vertex 
 {
@@ -25,8 +26,8 @@ struct MeshDef : public Resource
 MeshDef  make_meshdef( uint vertex_count, uint index_count );
 void     destroy_meshdef( MeshDef* meshdef );
 
-MeshDef* load_mesh_from_data( const char* name, const std::vector<Vertex>& vertices, const std::vector<uint>& indices );
-MeshDef* load_mesh( const char* file );
+MeshDef* load_mesh_from_data( MemoryPool<MeshDef>& mesh_pool, const char* name, const std::vector<Vertex>& vertices, const std::vector<uint>& indices );
+MeshDef* load_mesh( MemoryPool<MeshDef>& mesh_pool, const char* file );
 
 
 /* @Improvements: Might reuse this if we want to pack things better...

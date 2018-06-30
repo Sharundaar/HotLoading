@@ -8,6 +8,7 @@
 #include "basic_types.h"
 #include "basics.h"
 #include "resource.h"
+#include "memory_pool.h"
 
 enum class MaterialParamType : ushort
 {
@@ -60,7 +61,7 @@ struct Shader : public Resource
 
 
 char* extract_shader_name( const char* file, char* buffer, uint buffer_length );
-Shader* load_shader( const char* source_file );
+Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file );
 bool are_material_equivalent( const MaterialDef* def1, const MaterialDef* def2 );
 MaterialDef* make_material_definition( uint program, const std::string& params );
 MaterialDef* find_equivalent_material( const MaterialDef* def );

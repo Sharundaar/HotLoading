@@ -1,7 +1,5 @@
 #include "texture.h"
 
-#include "dll.h"
-
 #include <GLAD/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -14,10 +12,9 @@ Texture init_texture()
     return tex;
 }
 
-Texture* instantiate_empty_texture()
+Texture* instantiate_empty_texture( MemoryPool<Texture>& texture_pool )
 {
-    auto& appdata = get_dll_appdata();
-    return appdata.global_store.texture_pool.Instantiate();
+    return texture_pool.Instantiate();
 }
 
 void upload_texture( Texture* texture )
@@ -50,10 +47,9 @@ void upload_texture( Texture* texture )
     glGenerateMipmap( GL_TEXTURE_2D );
 }
 
-Texture* get_texture( const char* source_file )
+Texture* get_texture( MemoryPool<Texture>& texture_pool, const char* source_file )
 {
-    auto& appdata = get_dll_appdata();
-    for( auto texture : appdata.global_store.texture_pool )
+    for( auto texture : texture_pool )
     {
         if( texture->source->file == source_file )
             return texture;
@@ -61,11 +57,9 @@ Texture* get_texture( const char* source_file )
     return nullptr;
 }
 
-Texture* load_texture( const std::string& source_file )
+Texture* load_texture( MemoryPool<Texture>& texture_pool, const std::string& source_file )
 {
-    auto& appdata = get_dll_appdata();
-
-    auto texture = instantiate_empty_texture();
+    auto texture = instantiate_empty_texture( texture_pool );
     setup_resource( texture, source_file.c_str(), source_file.c_str() );
 
     i32 width, height, channels;

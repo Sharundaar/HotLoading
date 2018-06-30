@@ -17,6 +17,8 @@
 #include "object.h"
 #include "immediate_mode.h"
 
+#include "resource_pool.h"
+
 Appdata  s_default_appdata = {};
 Appdata* s_appdata = nullptr;
 
@@ -147,11 +149,11 @@ static void init_imgui( Appdata& appdata )
     io.DisplaySize.x = appdata.sdl_info.width;
     io.DisplaySize.y = appdata.sdl_info.height;
     
-    auto imgui_texture = get_texture( "imgui_texture" );
+    auto imgui_texture = get_texture( get_resource_pool<Texture>( appdata.global_store.resource_pool ), "imgui_texture" );
 
     if( imgui_texture == nullptr )
     {
-        imgui_texture = appdata.global_store.texture_pool.Instantiate();
+        imgui_texture = get_resource_pool<Texture>( appdata.global_store.resource_pool ).Instantiate();
         setup_resource( imgui_texture, "imgui_texture", "imgui_texture" );
     }
 
@@ -188,19 +190,31 @@ static void init_imgui( Appdata& appdata )
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     appdata.imgui_info.texture = imgui_texture;
-    appdata.imgui_info.shader = load_shader( "datas/shaders/imgui_shader.glsl" );
+    appdata.imgui_info.shader = load_shader( get_resource_pool<Shader>(appdata.global_store.resource_pool), "datas/shaders/imgui_shader.glsl" );
+}
+
+void init_resource_pools( Appdata& appdata )
+{
+    init_resource_pool<Shader>( appdata.global_store.resource_pool );
+    init_resource_pool<Texture>( appdata.global_store.resource_pool );
+    init_resource_pool<MeshDef>( appdata.global_store.resource_pool );
 }
 
 void reload_dll()
 {
     println( "[INFO]: DLL reloaded." );
     auto& appdata = get_dll_appdata();
+
+    reload_metadata( appdata );
+    report_types( appdata );
+
     if( !appdata.sdl_info.window )
     {
         init_graphics( appdata );
+        init_resource_pools( appdata );
 
-        appdata.test_data.checkerboard_texture = load_texture( "datas/textures/checkerboard.png" );
-        appdata.test_data.texture_shader = load_shader( "datas/shaders/transformed_texture.glsl" );
+        appdata.test_data.checkerboard_texture = load_texture( get_resource_pool<Texture>( appdata.global_store.resource_pool ), "datas/textures/checkerboard.png" );
+        appdata.test_data.texture_shader = load_shader( get_resource_pool<Shader>(appdata.global_store.resource_pool), "datas/shaders/transformed_texture.glsl" );
     }
     else
     {
@@ -210,8 +224,6 @@ void reload_dll()
 
     init_imgui( appdata );
     init_immediate();
-    reload_metadata( appdata );
-    report_types( appdata );
     init_input_state( appdata.input_state );
 }
 

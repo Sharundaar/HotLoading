@@ -38,6 +38,7 @@ namespace
 class MemoryPoolBase
 {
 public:
+    virtual void* GetRaw( u32 idx ) = 0;
     virtual void DestroyByIndex( u32 idx ) = 0;
     virtual u32 InstantiateByIndex() = 0;
 };
@@ -208,6 +209,11 @@ public:
 
         assert( blob != nullptr, "Error: Tried to get something that doesn't belong to this pool." );
         return Get( blob, idx );
+    }
+
+    virtual void* GetRaw( u32 idx )
+    {
+        return static_cast<void*>( Get( idx ) );
     }
 
     u32 IndexOf( const T* obj )

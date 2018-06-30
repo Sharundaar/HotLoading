@@ -1,7 +1,6 @@
 #include "mesh.h"
 
 #include "basics.h"
-#include "dll.h"
 
 /* assimp include files. These three are usually needed. */
 #include <assimp/cimport.h>
@@ -58,9 +57,9 @@ void destroy_meshdef( MeshDef* meshdef )
     clear_resource( meshdef );
 }
 
-MeshDef* load_mesh_from_data( const char* name, const std::vector<Vertex>& vertices, const std::vector<uint>& indices )
+MeshDef* load_mesh_from_data( MemoryPool<MeshDef>& mesh_pool, const char* name, const std::vector<Vertex>& vertices, const std::vector<uint>& indices )
 {
-    MeshDef* def = get_dll_appdata().global_store.mesh_pool.Instantiate();
+    MeshDef* def = mesh_pool.Instantiate();
     *def = make_meshdef( (uint)vertices.size(), (uint)indices.size() );
     setup_resource( def, nullptr, name );
 
@@ -70,7 +69,7 @@ MeshDef* load_mesh_from_data( const char* name, const std::vector<Vertex>& verti
     return def;
 }
 
-MeshDef* load_mesh( const char* file_path )
+MeshDef* load_mesh( MemoryPool<MeshDef>& mesh_pool, const char* file_path )
 {
     const struct aiScene* scene = aiImportFile( file_path, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_Triangulate | aiProcess_MakeLeftHanded );
 
@@ -88,7 +87,7 @@ MeshDef* load_mesh( const char* file_path )
         return nullptr;
     }
 
-    MeshDef* def = get_dll_appdata().global_store.mesh_pool.Instantiate();
+    MeshDef* def = mesh_pool.Instantiate();
     *def = make_meshdef( mesh->mNumVertices, mesh->mNumFaces * 3 );
     setup_resource( def, file_path, mesh->mName.C_Str() );
 

@@ -14,6 +14,7 @@
 #include "texture.h"
 #include "timer.h"
 #include "input_state.h"
+#include "resource_pool.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -54,10 +55,8 @@ struct Metadata
 struct GlobalStore
 {
     MemoryPool<ResourceSource> resource_sources_pool = {};
-    MemoryPool<Shader>         shader_pool = {};
     MemoryPool<MaterialDef>    material_pool = {};
-    MemoryPool<MeshDef>        mesh_pool = {};
-    MemoryPool<Texture>        texture_pool = {};
+    ResourcePool               resource_pool = {};
 };
 
 struct ImguiInfo
