@@ -1,7 +1,6 @@
 #include "immediate_mode.h"
 
 #include "basics.h"
-#include "dll.h"
 #include "resource_pool.h"
 
 #include <SDL.h>
@@ -58,16 +57,17 @@ namespace
     {
         glGenBuffers( 4, &immediate_context.vbo_vertices );
         glGenVertexArrays( 1, &immediate_context.vao );
-    
-        auto& appdata = get_dll_appdata();
-        immediate_shader = load_shader( get_resource_pool<Shader>( appdata.global_store.resource_pool ), "datas/shaders/immediate_shader.glsl" );
-        immediate_set_shader( *immediate_shader );
     }
 }
 
 void init_immediate()
 {
     Initialize_ImmediateContext();
+}
+
+void immediate_set_default_shader( Shader* shader )
+{
+    immediate_shader = shader;
 }
 
 void cleanup_immediate()

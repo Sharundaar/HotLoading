@@ -83,6 +83,8 @@ struct AppState
 
     Timer global_timer = {};
     int   global_frame_count = 0;
+
+    Shader* immediate_default_shader = nullptr;
 };
 
 struct Appdata

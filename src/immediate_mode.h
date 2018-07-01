@@ -6,7 +6,6 @@
 #include "mesh.h"
 
 
-
 void init_immediate();
 void cleanup_immediate();
 
@@ -14,6 +13,7 @@ void cleanup_immediate();
 void immediate_clear();
 void immediate_flush();
 
+void immediate_set_default_shader( Shader* shader );
 void immediate_set_shader       ( const Shader& shader );
 void immediate_set_world_matrix ( const Matrix4& w );
 void immediate_set_view_matrix  ( const Matrix4& v );
