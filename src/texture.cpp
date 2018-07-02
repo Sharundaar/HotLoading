@@ -1,4 +1,5 @@
 #include "texture.h"
+#include "file_parser.h"
 
 #include <GLAD/glad.h>
 
@@ -6,20 +7,10 @@
 #define STB_ASSERT
 #include <stb_image.h>
 
-Texture init_texture()
-{
-    Texture tex;
-    return tex;
-}
-
-Texture* instantiate_empty_texture( MemoryPool<Texture>& texture_pool )
-{
-    return texture_pool.Instantiate();
-}
-
 void upload_texture( Texture* texture )
 {
-    glGenTextures( 1, &texture->buffer );
+    if( texture->buffer == 0 )
+        glGenTextures( 1, &texture->buffer );
 
     glBindTexture( GL_TEXTURE_2D, texture->buffer );
 
@@ -47,11 +38,11 @@ void upload_texture( Texture* texture )
     glGenerateMipmap( GL_TEXTURE_2D );
 }
 
-Texture* get_texture( MemoryPool<Texture>& texture_pool, const char* source_file )
+Texture* find_texture( MemoryPool<Texture>& texture_pool, const char* name )
 {
     for( auto texture : texture_pool )
     {
-        if( texture->source->file == source_file )
+        if( texture->name == name )
             return texture;
     }
     return nullptr;
@@ -59,8 +50,18 @@ Texture* get_texture( MemoryPool<Texture>& texture_pool, const char* source_file
 
 Texture* load_texture( MemoryPool<Texture>& texture_pool, const std::string& source_file )
 {
-    auto texture = instantiate_empty_texture( texture_pool );
-    setup_resource( texture, source_file.c_str(), source_file.c_str() );
+    char buffer[256];
+    extract_file_name( source_file.c_str(), buffer, 256 );
+    auto texture = find_texture( texture_pool, buffer );
+    if( !texture )
+    {
+        texture = texture_pool.Instantiate();
+        setup_resource( texture, buffer, source_file.c_str() );
+    }
+    else
+    {
+        cleanup_texture( *texture );
+    }
 
     i32 width, height, channels;
     texture->data = stbi_load(source_file.c_str(), &width, &height, &channels, 0);
@@ -80,4 +81,11 @@ void cleanup_texture( Texture& texture )
     {
         stbi_image_free( texture.data );
     }
+
+    if( texture.buffer != 0 )
+    {
+        glDeleteTextures( 1, &texture.buffer );
+    }
+
+    texture = {};
 }

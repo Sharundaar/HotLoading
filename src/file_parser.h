@@ -30,6 +30,8 @@ const char* chomp_token           (const char* ptr);
 const char* chomp_line            (const char* ptr);
 const char* chomp_until_separator (const char* ptr);
 
+const char* extract_file_name( const char* file, char* buffer, uint buffer_length );
+
 bool try_parse_to_int ( const std::string& str, int& out );
 bool try_parse_to_uint( const std::string& str, uint& out );
 

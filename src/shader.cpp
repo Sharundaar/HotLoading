@@ -70,28 +70,15 @@ static MaterialDef* make_material_definition( uint program, const RFBlock* block
 
 char* extract_shader_name( const char* file, char* buffer, uint buffer_length )
 {
-    uint last_slash_pos = 0;
-    uint ext_pos = 0;
-    uint offset = 0;
-    while( is_eof( file[offset] ) )
-    {
-        if( file[offset] == '\\' || file[offset] == '/' )
-            last_slash_pos = offset;
-        if( file[offset] == '.' && ext_pos == 0 )
-            ext_pos = offset;
-
-        ++offset;
-    }
-
-    strncpy_s( buffer, buffer_length, file + last_slash_pos + 1, ext_pos - last_slash_pos );
+    extract_file_name( file, buffer, buffer_length );
     return buffer;
 }
 
-static Shader* get_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
+static Shader* find_shader( MemoryPool<Shader>& shader_pool, const char* name )
 {
     for(auto shader : shader_pool)
     {
-        if( shader->source->file == source_file )
+        if( shader->name == name )
             return shader;
     }
     return nullptr;
@@ -99,11 +86,6 @@ static Shader* get_shader( MemoryPool<Shader>& shader_pool, const char* source_f
 
 Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
 {
-    {
-        auto shader = get_shader( shader_pool, source_file );
-        if( shader ) return shader;
-    }
-
     std::string VERTEX_SHADER_TOKEN = "vertex";
     std::string FRAGMENT_SHADER_TOKEN = "fragment";
     std::string PARAMS_TOKEN = "params";
@@ -200,14 +182,16 @@ Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
     if(shader_link_error)
     {
         glDeleteProgram(shader_program);
-        return false;
+        return nullptr;
     }
-
-    auto shader = shader_pool.Instantiate();
-    assert( shader != nullptr, "Allocation error." );
 
     char shader_name[512];
     extract_shader_name( source_file, shader_name, 512 );
+    Shader* shader = find_shader( shader_pool, shader_name );
+    if( shader ) glDeleteProgram( shader->program );
+    else shader = shader_pool.Instantiate();
+    assert( shader != nullptr, "Allocation error." );
+
     setup_resource( shader, source_file, shader_name );
     shader->program           = shader_program;
     shader->exported_material = make_material_definition( shader->program, params_block );

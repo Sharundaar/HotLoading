@@ -156,12 +156,11 @@ static void init_imgui( Appdata& appdata )
     io.DisplaySize.x = appdata.sdl_info.width;
     io.DisplaySize.y = appdata.sdl_info.height;
     
-    auto imgui_texture = get_texture( get_resource_pool<Texture>(), "imgui_texture" );
-
-    if( imgui_texture == nullptr )
+    auto imgui_texture = find_texture( get_resource_pool<Texture>(), "imgui_texture" );
+    if( !imgui_texture )
     {
         imgui_texture = get_resource_pool<Texture>().Instantiate();
-        setup_resource( imgui_texture, "imgui_texture", "imgui_texture" );
+        setup_resource( imgui_texture, "imgui", "imgui_texture" );
     }
 
     int width, height;

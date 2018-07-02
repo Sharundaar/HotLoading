@@ -17,8 +17,7 @@ struct Texture : public Resource
     uint buffer = 0;
 };
 
-Texture* get_texture( MemoryPool<Texture>& texture_pool, const char* source_file );
-Texture* instantiate_empty_texture( MemoryPool<Texture>& texture_pool );
+Texture* find_texture( MemoryPool<Texture>& texture_pool, const char* name );
 void upload_texture( Texture* texture );
 Texture* load_texture( MemoryPool<Texture>& texture_pool, const std::string& source_file );
 void cleanup_texture( Texture& texture );

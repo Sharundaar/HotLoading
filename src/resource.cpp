@@ -4,8 +4,6 @@
 #include <unordered_map>
 #include <string.h>
 
-std::unordered_map<const char*, ResourceSource*> resource_sources;
-
 void setup_resource( Resource* resource, const char* source_file, const char* name )
 {
     resource->name = name;
@@ -19,32 +17,30 @@ void clear_resource( Resource* resource )
     remove_resource_from_source( resource );
 }
 
-ResourceSource* add_source( const char* file )
+ResourceSource* find_source( MemoryPool<ResourceSource>& pool, const char* source )
 {
-    if( resource_sources.find( file ) == resource_sources.cend() )
-    {
-        auto source = get_dll_appdata().global_store.resource_sources_pool.Instantiate();
-        source->file = file;
-        resource_sources[ file ] = source;
-        return source;
-    }
-
-    return resource_sources[ file ];
+    for( auto s : pool )
+        if ( s->source == source )
+            return s;
+    return nullptr;
 }
 
-ResourceSource* get_source( const char* file, bool add_if_needed )
+ResourceSource* create_source( MemoryPool<ResourceSource>& pool, const char* source )
 {
-    auto it = resource_sources.find( file );
-    if( it == resource_sources.cend() )
-    {
-        if( add_if_needed )
-            return add_source( file );
-        else
-            return nullptr;
-        
-        return resource_sources[ file ];
-    }
-    return resource_sources[ file ];
+    auto& appdata = get_dll_appdata();
+    
+    auto resource_source = appdata.global_store.resource_sources_pool.Instantiate();
+    resource_source->source = source;
+    return resource_source;
+}
+
+ResourceSource* get_source( const char* source, bool add_if_needed )
+{
+    auto& pool = get_dll_appdata().global_store.resource_sources_pool;
+    auto resource_source = find_source( pool, source );
+    if( !resource_source && add_if_needed )
+        resource_source = create_source( pool, source );
+    return resource_source;
 }
 
 void add_resource_to_source( Resource* resource, const char* source_file )
@@ -56,7 +52,6 @@ void add_resource_to_source( Resource* resource, const char* source_file )
     else
     {
         auto source = get_source( source_file, true );
-        source->associated_resources.insert( resource );
         resource->source = source;
     }
 }
@@ -65,7 +60,6 @@ void remove_resource_from_source( Resource* resource )
 {
     if( resource->source != nullptr )
     {
-        resource->source->associated_resources.erase( resource );
         resource->source = nullptr;
     }
 }

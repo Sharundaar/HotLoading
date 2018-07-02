@@ -145,3 +145,22 @@ bool try_parse_to_uint( const std::string& str, uint& out )
         return false;
     }
 }
+
+const char* extract_file_name( const char* file, char* buffer, uint buffer_length )
+{
+    uint last_slash_pos = 0;
+    uint ext_pos = 0;
+    uint offset = 0;
+    while( !is_eof( file[offset] ) )
+    {
+        if( file[offset] == '\\' || file[offset] == '/' )
+            last_slash_pos = offset;
+        if( file[offset] == '.' && ext_pos == 0 )
+            ext_pos = offset;
+
+        ++offset;
+    }
+
+    strncpy_s( buffer, buffer_length, file + last_slash_pos + 1, (ext_pos-1) - last_slash_pos );
+    return buffer;
+}
