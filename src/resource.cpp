@@ -9,7 +9,7 @@ std::unordered_map<const char*, ResourceSource*> resource_sources;
 void setup_resource( Resource* resource, const char* source_file, const char* name )
 {
     resource->name = name;
-    resource->dirty = false;
+    resource->loaded = false;
 
     add_resource_to_source( resource, source_file );
 }

@@ -18,7 +18,7 @@ struct Resource : public Object
     ResourceSource* source = nullptr;
 
     // resource data
-    bool dirty = false;
+    bool loaded = false;
     std::string name;
 
 };
