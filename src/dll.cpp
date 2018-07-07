@@ -557,6 +557,8 @@ void loop_dll( )
     immediate_set_view_matrix( Matrix4::RotationTranslation( { 0, 0, 1 } , Quaternion::Identity() ) ); 
     immediate_set_projection_matrix( Matrix4::OpenGLProjectionMatrix( 90.0f, appdata.sdl_info.width / appdata.sdl_info.height, 0.001f, 1000.0f ) );
 
+    immediate_set_world_matrix( Matrix4::RotationTranslation( appdata.test_data.checkerboard_entity.transform.position, appdata.test_data.checkerboard_entity.transform.rotation ) );
+
     immediate_set_texture( appdata.test_data.checkerboard_texture );
     immediate_set_shader( *appdata.test_data.texture_shader );
     immediate_draw_quad( Vector3{ -1, -1, 0 }, Vector2{ 0, 0 },
@@ -570,6 +572,19 @@ void loop_dll( )
     if( appdata.app_state.debug_open )
     {
         ImGui::Begin( "Debug", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
+            f32 data_float = appdata.test_data.checkerboard_entity.transform.position.x;
+            if( ImGui::InputFloat( "Entity PosX", &data_float, 0.1f, 1.0f, 3 ) )
+                appdata.test_data.checkerboard_entity.transform.position.x = data_float;
+            ImGui::Text("Frame count: %i", appdata.app_state.global_frame_count);
+            ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
+
+            if(ImGui::Button("Quit")) appdata.app_state.running = false;
+        ImGui::End();
+    }
+
+    if( appdata.app_state.type_info_open )
+    {
+        ImGui::Begin( "TypeInfo", &appdata.app_state.type_info_open, ImGuiWindowFlags_NoCollapse );
             const float child_height = 146.0f;
             ImGui::BeginChild( "Types", ImVec2( 0.30f * ImGui::GetWindowWidth(), child_height ) );
                 ImGui::Text( "Types: " );
@@ -648,11 +663,6 @@ void loop_dll( )
 
                 }
             ImGui::EndChild();
-
-            ImGui::Text("Frame count: %i", appdata.app_state.global_frame_count);
-            ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
-
-            if(ImGui::Button("Quit")) appdata.app_state.running = false;
         ImGui::End();
     }
 

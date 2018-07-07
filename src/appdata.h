@@ -15,6 +15,7 @@
 #include "timer.h"
 #include "input_state.h"
 #include "resource_pool.h"
+#include "entity.h"
 
 struct Appdata;
 struct DLLInfo;
@@ -69,11 +70,14 @@ struct TestData
 {
     Texture* checkerboard_texture = nullptr;
     Shader* texture_shader = nullptr;
+
+    Entity checkerboard_entity = {};
 };
 
 struct AppState
 {
     bool debug_open = true;
+    bool type_info_open = false;
     bool demo_window_open = false;
     bool inspector_open = false;
 
