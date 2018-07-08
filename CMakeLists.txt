@@ -41,7 +41,8 @@ set(LIBSRC ${COMMONSRC}
             src/texture.cpp
             src/immediate_mode.cpp
             src/input_state.cpp
-            src/resource_pool.cpp )
+            src/resource_pool.cpp
+            src/inspector.cpp )
 
 set(EXECSRC ${COMMONSRC}
          src/main.cpp )

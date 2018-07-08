@@ -21,6 +21,9 @@ struct Quaternion
 
     static Quaternion FromAxisAngle( float angle_in_degree, const Vector3& axis );
     static Quaternion Identity();
+
+    static Quaternion FromEulerAngle( float yaw, float pitch, float roll );
+    static Vector3 ToEulerAngle( const Quaternion& quat );
 };
 
 #ifdef MATHLIB_IMPLEMENTATION
@@ -92,6 +95,48 @@ Quaternion Quaternion::Identity()
         0.0f,
         0.0f,
     };
+}
+
+Quaternion Quaternion::FromEulerAngle( float yaw, float pitch, float roll )
+{
+    Quaternion q;
+        // Abbreviations for the various angular functions
+	float cy = cosf(yaw * 0.5f);
+	float sy = sinf(yaw * 0.5f);
+	float cr = cosf(roll * 0.5f);
+	float sr = sinf(roll * 0.5f);
+	float cp = cosf(pitch * 0.5f);
+	float sp = sinf(pitch * 0.5f);
+
+	q.w = cy * cr * cp + sy * sr * sp;
+	q.x = cy * sr * cp - sy * cr * sp;
+	q.y = cy * cr * sp + sy * sr * cp;
+	q.z = sy * cr * cp - cy * sr * sp;
+	return q;
+}
+
+Vector3 Quaternion::ToEulerAngle( const Quaternion& q )
+{
+    Vector3 ypr;
+
+    // roll (x-axis rotation)
+	float sinr = 2.0f * (q.w * q.x + q.y * q.z);
+	float cosr = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+	ypr.m[2] = atan2(sinr, cosr);
+
+	// pitch (y-axis rotation)
+	float sinp = 2.0f * (q.w * q.y - q.z * q.x);
+	if (fabs(sinp) >= 1.0f)
+		ypr.m[1] = (float)copysign(M_PI / 2.0f, sinp); // use 90 degrees if out of range
+	else
+		ypr.m[1] = asin(sinp);
+
+	// yaw (z-axis rotation)
+	float siny = 2.0f * (q.w * q.z + q.x * q.y);
+	float cosy = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);  
+	ypr.m[0] = atan2(siny, cosy);
+
+    return ypr;
 }
 
 #endif
