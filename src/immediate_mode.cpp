@@ -217,29 +217,23 @@ void immediate_flush()
             switch( param.type )
             {
             case MaterialParamType::TEXTURE2D:
-            if( immediate_context.texture )
-            {
-                glActiveTexture( GL_TEXTURE0 );
-                glBindTexture( GL_TEXTURE_2D, immediate_context.texture->buffer );
-                glUniform1i( param.location, 0 );
-            }
-            break;
+                if( immediate_context.texture )
+                {
+                    glActiveTexture( GL_TEXTURE0 );
+                    glBindTexture( GL_TEXTURE_2D, immediate_context.texture->buffer );
+                    glUniform1i( param.location, 0 );
+                }
+                break;
             default:
                 assert(false, "Error: Unhandled param type.");
                 break;
             }
+            break;
 
         default:
             assert(false, "Error: Unhandled param usage.");
             break;
         }
-    }
-
-    if( immediate_context.texture )
-    {
-        glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, immediate_context.texture->buffer );
-        // glUniform1i( 3, 0 );
     }
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, context.vbo_indices );

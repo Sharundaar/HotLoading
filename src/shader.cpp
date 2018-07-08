@@ -18,7 +18,7 @@ static std::unordered_map<MaterialParamType, std::string> s_materialParamTypeDic
     { MaterialParamType::VECTOR4,   "vec4" },
     { MaterialParamType::MATRIX3,   "mat3" },
     { MaterialParamType::MATRIX4,   "mat4" },
-    { MaterialParamType::TEXTURE2D, "sampler2d" },
+    { MaterialParamType::TEXTURE2D, "sampler2D" },
 };
 
 const std::string& to_string( MaterialParamType type )
@@ -247,7 +247,6 @@ MaterialParam make_material_param( const char* name, uint location,
     param.name     = name;
     param.location = location;
 
-    // @Improvement: This is slooooow !!
     for( auto pair : s_materialParamTypeDictionary )
     {
         if( pair.second == type )
@@ -259,7 +258,6 @@ MaterialParam make_material_param( const char* name, uint location,
 
     if( usage != nullptr && !is_eof( *usage ) )
     {
-        // @Improvement: This is slooooow !!
         for( auto pair : s_materialParamUsageDictionary )
         {
             if( pair.second == usage )
@@ -343,6 +341,7 @@ MaterialDef* make_material_definition( uint program, const std::string& params )
         // @Cleanup: NO SANITY CHECKS ARE DONE !!!
         // @Cleanup: NO SANITY CHECKS ARE DONE !!!
 
+        params_ptr = chomp_empty_space( token_end );
         std::string usage_token;
         if( !is_new_line( *params_ptr ) )
         {

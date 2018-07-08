@@ -1,4 +1,4 @@
-:custom
+:params
 sampler2D FontAtlas
 
 :vertex
