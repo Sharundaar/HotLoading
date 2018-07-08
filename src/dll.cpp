@@ -109,9 +109,6 @@ static void reload_metadata( Appdata& appdata )
 
     auto current_allocator = appdata.metadata.current_allocator;
 
-    current_allocator->type_size = 0;
-    current_allocator->data_size = 0;
-
     if( current_allocator->type_capacity == 0 )
     {
         const size_t capacity = 0x5000; // @TODO: Allocate according to generated information
@@ -126,6 +123,12 @@ static void reload_metadata( Appdata& appdata )
         current_allocator->data_capacity = capacity; 
     }
 
+    current_allocator->type_size = 0;
+    current_allocator->data_size = 0;
+
+    memset( current_allocator->data_buffer, 0, sizeof(uint8_t) * current_allocator->data_capacity );
+    memset( current_allocator->type_buffer, 0, sizeof(uint8_t) * current_allocator->type_capacity );
+    
     register_types( default_type_allocator, current_allocator, default_data_allocator, current_allocator );
 
     appdata.metadata.type_infos.clear();
@@ -492,10 +495,40 @@ void draw_data_inspector( Appdata& appdata, const TypeInfo* type, u8* data )
     for( uint i=0; i<struct_info.field_count; ++i )
     {
         const auto& field = struct_info.fields[i];
-        if( field.type && field.type->type == TypeInfoType::Scalar )
-            draw_scalar_inspector( field.name, field.type, data + field.offset );
+        if( field.type )
+        {
+            if( (field.modifier & FieldInfoModifier::POINTER) && !(field.modifier & FieldInfoModifier::REFERENCE) )
+                ImGui::Text( "%s* %s", field.type->name, field.name );
+            else if( !(field.modifier & FieldInfoModifier::POINTER) && (field.modifier & FieldInfoModifier::REFERENCE) )
+                ImGui::Text( "%s& %s", field.type->name, field.name );
+            else if( (field.modifier & FieldInfoModifier::POINTER) && (field.modifier & FieldInfoModifier::REFERENCE) )
+                ImGui::Text( "%s ambiguous %s", field.type->name, field.name );
+            else if( !(field.modifier & FieldInfoModifier::POINTER) && !(field.modifier & FieldInfoModifier::REFERENCE) )
+            {
+                switch(field.type->type)
+                {
+                    case TypeInfoType::Scalar:
+                        draw_scalar_inspector( field.name, field.type, data + field.offset );
+                        break;
+                    case TypeInfoType::Struct:
+                    {
+                        if( ImGui::TreeNode( field.name ) )
+                        {
+                            draw_data_inspector( appdata, field.type, data + field.offset );
+                            ImGui::TreePop();
+                        }
+                        break;
+                    }
+                    default:
+                        ImGui::Text( "%s %s", field.type->name, field.name );
+                        break;
+                }
+            }
+        }
         else
-            ImGui::Text( "%s %s", field.type ? field.type->name : "(unknown)", field.name );
+        {
+            ImGui::Text( "(unknown) %s", field.name );
+        }
     }
 }
 
@@ -531,6 +564,8 @@ void loop_dll( )
             appdata.app_state.running = false;
     }
 
+    if( appdata.input_state.is_key_down_this_frame(IK_F8) )
+        appdata.app_state.type_info_open = !appdata.app_state.type_info_open;
     if( appdata.input_state.is_key_down_this_frame(IK_F9) )
         appdata.app_state.debug_open = !appdata.app_state.debug_open;
     if( appdata.input_state.is_key_down_this_frame(IK_F10) )
@@ -573,11 +608,33 @@ void loop_dll( )
     {
         ImGui::Begin( "Debug", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
             f32 data_float = appdata.test_data.checkerboard_entity.transform.position.x;
-            if( ImGui::InputFloat( "Entity PosX", &data_float, 0.1f, 1.0f, 3 ) )
+            if( ImGui::SliderFloat("Entity PosX Slider", &data_float, -1.0f, 1.0f) )
                 appdata.test_data.checkerboard_entity.transform.position.x = data_float;
+            data_float = appdata.test_data.checkerboard_entity.transform.position.y;
+            if( ImGui::SliderFloat("Entity PosY Slider", &data_float, -1.0f, 1.0f) )
+                appdata.test_data.checkerboard_entity.transform.position.y = data_float;
+            data_float = appdata.test_data.checkerboard_entity.transform.position.z;
+            if( ImGui::SliderFloat("Entity PosZ Slider", &data_float, -1.0f, 1.0f) )
+                appdata.test_data.checkerboard_entity.transform.position.z = data_float;
+
             ImGui::Text("Frame count: %i", appdata.app_state.global_frame_count);
             ImGui::Text("Frame rate: %f", 1.0 / appdata.app_state.global_timer.Elapsed());
 
+/*
+            if(ImGui::CollapsingHeader("Appdata Offset data"))
+            {
+                auto appdata_type = appdata.metadata.type_infos[type_id(appdata)];
+
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[0].name, appdata_type->struct_info.fields[0].offset, offsetof(Appdata, dll_info) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[1].name, appdata_type->struct_info.fields[1].offset, offsetof(Appdata, sdl_info) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[2].name, appdata_type->struct_info.fields[2].offset, offsetof(Appdata, imgui_info) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[3].name, appdata_type->struct_info.fields[3].offset, offsetof(Appdata, metadata) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[4].name, appdata_type->struct_info.fields[4].offset, offsetof(Appdata, global_store) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[5].name, appdata_type->struct_info.fields[5].offset, offsetof(Appdata, input_state) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[6].name, appdata_type->struct_info.fields[6].offset, offsetof(Appdata, test_data) );
+                ImGui::Text( "%s offset in Appdata %i | %i", appdata_type->struct_info.fields[7].name, appdata_type->struct_info.fields[7].offset, offsetof(Appdata, app_state) );
+            }
+*/
             if(ImGui::Button("Quit")) appdata.app_state.running = false;
         ImGui::End();
     }
@@ -669,8 +726,8 @@ void loop_dll( )
     if( appdata.app_state.inspector_open )
     {
         ImGui::Begin( "Inspector", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
-            const TypeInfo* appstate_type = appdata.metadata.type_infos[ type_id(appdata.app_state) ];
-            draw_data_inspector( appdata, appstate_type, reinterpret_cast<u8*>(&appdata.app_state) );
+            const TypeInfo* appdata_type = appdata.metadata.type_infos[ type_id(appdata) ];
+            draw_data_inspector( appdata, appdata_type, reinterpret_cast<u8*>(&appdata) );
         ImGui::End();
     }
 

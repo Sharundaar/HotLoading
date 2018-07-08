@@ -5,7 +5,7 @@
 
 static MemoryPoolBase* create_pool( TypeId type )
 {
-    switch( type )
+    switch( (LocalTypeId)type )
     {
         case LocalTypeId::Shader_id:
             return new MemoryPool<Shader>();
