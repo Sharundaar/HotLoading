@@ -245,6 +245,8 @@ MaterialParam make_material_param( const char* name, uint location,
     MaterialParam param;
 
     param.name     = name;
+
+    // @Cleanup: Should check that location is not -1...
     param.location = location;
 
     for( auto pair : s_materialParamTypeDictionary )

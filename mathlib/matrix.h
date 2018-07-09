@@ -358,7 +358,7 @@ Matrix4 Matrix4::RotationTranslation( const Vector3& t, const Quaternion& q )
     Matrix4 rot   = FromQuaternion( q );
     Matrix4 trans = TranslationMatrix( t );
 
-    return rot * trans;
+    return trans * rot;
 }
 
 #endif

@@ -9,12 +9,18 @@
 #define IMMEDIATE_VERTEX_COUNT 65536
 #define IMMEDIATE_INDEX_COUNT 65536
 
+struct ShaderParamValue
+{
+    uint param_index;
+    uint param_value;
+};
+
 struct ImmediateContext
 {
     typedef std::array<Vector3, IMMEDIATE_VERTEX_COUNT> Vertices;
     typedef std::array<Color,   IMMEDIATE_VERTEX_COUNT> Colors;
     typedef std::array<Vector2, IMMEDIATE_VERTEX_COUNT> UVW;
-    typedef std::array<uint,    IMMEDIATE_INDEX_COUNT>  Indices;    
+    typedef std::array<uint,    IMMEDIATE_INDEX_COUNT>  Indices;
 
     Vertices vertices     = {};
     Colors   colors       = {};
@@ -45,6 +51,8 @@ struct ImmediateContext
     Vector4 scissor_window = {};
 
     const Shader* shader = nullptr;
+    std::array<ShaderParamValue, 8> custom_param_values;
+
     const Texture* texture = nullptr;
 };
 
@@ -217,11 +225,15 @@ void immediate_flush()
             switch( param.type )
             {
             case MaterialParamType::TEXTURE2D:
-                if( immediate_context.texture )
+                for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
                 {
-                    glActiveTexture( GL_TEXTURE0 );
-                    glBindTexture( GL_TEXTURE_2D, immediate_context.texture->buffer );
-                    glUniform1i( param.location, 0 );
+                    if( immediate_context.custom_param_values[j].param_index == i )
+                    {
+                        glActiveTexture( GL_TEXTURE0 + param.location );
+                        glBindTexture( GL_TEXTURE_2D, immediate_context.custom_param_values[j].param_value );
+                        glUniform1i( param.location, 0 );
+                        break;
+                    }
                 }
                 break;
             default:
@@ -289,6 +301,22 @@ void immediate_set_shader( const Shader& shader )
 {
     immediate_context.shader = &shader;
     immediate_setup_buffers();
+}
+
+void immediate_set_custom_param_value( const char* param_name, uint value )
+{
+    if( !immediate_context.shader )
+        return;
+
+    auto def = immediate_context.shader->material;
+    for( uint i=0; i<def->params.size(); ++i )
+    {
+        if( def->params[i].name == param_name )
+        {
+            immediate_context.custom_param_values[i] = { i, value };
+            break;
+        }
+    }
 }
 
 void immediate_draw_triangle(

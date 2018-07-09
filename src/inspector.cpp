@@ -161,26 +161,27 @@ bool draw_data_inspector_override( const char* name,const TypeInfo* type, u8* da
             if(ImGui::TreeNode( name ) )
             {
                 auto data_quaternion = (Quaternion*)data;
-                Vector3 ypr = Quaternion::ToEulerAngle( *data_quaternion );
+                Vector3 ypr = Quaternion::ToEulerAngle( *data_quaternion ) * (180.0f / M_PI);
                 bool change = false;
                 f32 data_float = ypr.x;
-                if( ImGui::SliderFloat("Yaw", &data_float, -M_PI, M_PI) )
+                if( ImGui::SliderFloat("Yaw", &data_float, -180.0f, 180.0) )
                 {
                     ypr.x = data_float;
                     change = true;
                 }
                 data_float = ypr.y;
-                if( ImGui::SliderFloat("Pitch", &data_float, -M_PI, M_PI) )
+                if( ImGui::SliderFloat("Pitch", &data_float, -89.0f, 89.0f) )
                 {
                     ypr.y = data_float;
                     change = true;
                 }
                 data_float = ypr.z;
-                if( ImGui::SliderFloat("Roll", &data_float, -M_PI, M_PI) )
+                if( ImGui::SliderFloat("Roll", &data_float, -180.0f, 180.0f) )
                 {
                     ypr.z = data_float;
                     change = true;
                 }
+                ypr = ypr * (M_PI / 180.0f);
                 if( change )
                     *data_quaternion = Quaternion::FromEulerAngle( ypr.x, ypr.y, ypr.z );
                 ImGui::TreePop();

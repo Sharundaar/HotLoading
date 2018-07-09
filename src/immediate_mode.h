@@ -22,6 +22,8 @@ void immediate_set_texture( const Texture* texture );
 void immediate_set_draw_type    ( uint type );
 void immediate_set_depth        ( float depth );
 
+void immediate_set_custom_param_value( const char* param_name, uint value );
+
 void immediate_enable_depth_test( bool enabled );
 void immediate_enable_blend( bool enabled );
 void immediate_enable_face_cull( bool enabled );

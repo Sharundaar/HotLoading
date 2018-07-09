@@ -308,7 +308,7 @@ static void render_imgui_data( const ImDrawData* draw_data )
 
                 // The texture for the draw call is specified by pcmd->TextureId.
                 // The vast majority of draw calls with use the imgui texture atlas, which value you have set yourself during initialization.
-                immediate_set_texture( (Texture*)pcmd->TextureId );
+                immediate_set_custom_param_value( "FontAtlas", ((Texture*)pcmd->TextureId)->buffer );
 
                 // We are using scissoring to clip some objects. All low-level graphics API supports it.
                 // If your engine doesn't support scissoring yet, you may ignore this at first. You will get some small glitches
@@ -420,8 +420,9 @@ void loop_dll( )
 
     immediate_set_world_matrix( Matrix4::RotationTranslation( appdata.test_data.checkerboard_entity.transform.position, appdata.test_data.checkerboard_entity.transform.rotation ) );
 
-    immediate_set_texture( appdata.test_data.checkerboard_texture );
     immediate_set_shader( *appdata.test_data.texture_shader );
+    immediate_set_custom_param_value( "Albedo", appdata.test_data.checkerboard_texture->buffer );
+
     immediate_draw_quad( Vector3{ -1, -1, 0 }, Vector2{ 0, 0 },
                          Vector3{ -1,  1, 0 }, Vector2{ 0, 1 },
                          Vector3{  1, -1, 0 }, Vector2{ 1, 0 },
