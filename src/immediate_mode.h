@@ -4,6 +4,7 @@
 #include "texture.h"
 #include "shader.h"
 #include "mesh.h"
+#include "variant_type.h"
 
 
 void init_immediate();
@@ -22,7 +23,7 @@ void immediate_set_texture( const Texture* texture );
 void immediate_set_draw_type    ( uint type );
 void immediate_set_depth        ( float depth );
 
-void immediate_set_custom_param_value( const char* param_name, uint value );
+void immediate_set_custom_param_value( const char* param_name, Variant value );
 
 void immediate_enable_depth_test( bool enabled );
 void immediate_enable_blend( bool enabled );

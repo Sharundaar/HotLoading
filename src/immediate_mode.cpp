@@ -12,7 +12,7 @@
 struct ShaderParamValue
 {
     uint param_index;
-    uint param_value;
+    Variant param_value;
 };
 
 struct ImmediateContext
@@ -230,8 +230,18 @@ void immediate_flush()
                     if( immediate_context.custom_param_values[j].param_index == i )
                     {
                         glActiveTexture( GL_TEXTURE0 + param.location );
-                        glBindTexture( GL_TEXTURE_2D, immediate_context.custom_param_values[j].param_value );
-                        glUniform1i( param.location, 0 );
+                        glBindTexture( GL_TEXTURE_2D, (i32)immediate_context.custom_param_values[j].param_value );
+                        glUniform1i( param.location, param.location );
+                        break;
+                    }
+                }
+                break;
+            case MaterialParamType::FLOAT:
+                for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
+                {
+                    if( immediate_context.custom_param_values[j].param_index == i )
+                    {
+                        glUniform1f( param.location, immediate_context.custom_param_values[j].param_value );
                         break;
                     }
                 }
@@ -303,7 +313,7 @@ void immediate_set_shader( const Shader& shader )
     immediate_setup_buffers();
 }
 
-void immediate_set_custom_param_value( const char* param_name, uint value )
+void immediate_set_custom_param_value( const char* param_name, Variant value )
 {
     if( !immediate_context.shader )
         return;

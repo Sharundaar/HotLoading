@@ -233,7 +233,9 @@ void reload_dll()
         init_resource_pools( appdata );
 
         appdata.test_data.checkerboard_texture = load_texture( get_resource_pool<Texture>(), "datas/textures/checkerboard.png" );
+        appdata.test_data.flower_texture = load_texture( get_resource_pool<Texture>(), "datas/textures/flowers.png" );
         appdata.test_data.texture_shader = load_shader( get_resource_pool<Shader>(), "datas/shaders/transformed_texture.glsl" );
+        appdata.test_data.mix_texture_shader = load_shader( get_resource_pool<Shader>(), "datas/shaders/texture_mix_shader.glsl" );
     }
     else
     {
@@ -420,8 +422,10 @@ void loop_dll( )
 
     immediate_set_world_matrix( Matrix4::RotationTranslation( appdata.test_data.checkerboard_entity.transform.position, appdata.test_data.checkerboard_entity.transform.rotation ) );
 
-    immediate_set_shader( *appdata.test_data.texture_shader );
-    immediate_set_custom_param_value( "Albedo", appdata.test_data.checkerboard_texture->buffer );
+    immediate_set_shader( *appdata.test_data.mix_texture_shader );
+    immediate_set_custom_param_value( "Albedo1", appdata.test_data.checkerboard_texture->buffer );
+    immediate_set_custom_param_value( "Albedo2", appdata.test_data.flower_texture->buffer );
+    immediate_set_custom_param_value( "amount", appdata.test_data.mix_amount );
 
     immediate_draw_quad( Vector3{ -1, -1, 0 }, Vector2{ 0, 0 },
                          Vector3{ -1,  1, 0 }, Vector2{ 0, 1 },

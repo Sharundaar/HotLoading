@@ -69,9 +69,13 @@ struct ImguiInfo
 struct TestData
 {
     Texture* checkerboard_texture = nullptr;
+    Texture* flower_texture = nullptr;
     Shader* texture_shader = nullptr;
+    Shader* mix_texture_shader = nullptr;
 
     Entity checkerboard_entity = {};
+
+    float mix_amount = 0.5f;
 };
 
 struct AppState
