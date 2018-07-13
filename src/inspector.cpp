@@ -134,10 +134,33 @@ void draw_scalar_inspector( const char* name, const TypeInfo* type, u8* data )
 
 }
 
+// @Cleanup: This leaks on dll reload...
+static u32 s_string_buffer_capacity;
+static char* s_string_buffer;
 bool draw_data_inspector_override( const char* name,const TypeInfo* type, u8* data )
 {
+    constexpr TypeId string_id = static_cast<TypeId>( LocalTypeId::std_string_id );
+
     switch( type->type_id )
     {
+        case string_id:
+        {
+            auto data_string = (std::string*)data;
+
+            if( s_string_buffer_capacity <= data_string->capacity() )
+            {
+                if( s_string_buffer )
+                    delete[] s_string_buffer;
+                s_string_buffer_capacity = (u32)max( 16, data_string->capacity() * 2 );
+                s_string_buffer = new char[s_string_buffer_capacity];
+            }
+
+            strcpy_s( s_string_buffer, s_string_buffer_capacity, data_string->c_str() );
+            ImGui::InputText( name, s_string_buffer, s_string_buffer_capacity );
+            data_string->assign( s_string_buffer );
+
+            return true;
+        }
         case type_id<Vector3>():
         {
             if( ImGui::TreeNode( name ) )

@@ -76,6 +76,8 @@ struct TestData
     Entity checkerboard_entity = {};
 
     float mix_amount = 0.5f;
+
+    std::string some_name;
 };
 
 struct AppState
