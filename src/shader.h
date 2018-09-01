@@ -45,7 +45,6 @@ struct MaterialParam
 
 struct MaterialDef
 {
-    MaterialDef* equivalent;
     std::vector<MaterialParam> params;
 };
 
@@ -56,14 +55,11 @@ struct Shader : public Resource
     uint program = 0;
 
     MaterialDef* material;
-    MaterialDef* exported_material;
 };
 
 
 char* extract_shader_name( const char* file, char* buffer, uint buffer_length );
 Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file );
-bool are_material_equivalent( const MaterialDef* def1, const MaterialDef* def2 );
 MaterialDef* make_material_definition( uint program, const std::string& params );
-MaterialDef* find_equivalent_material( const MaterialDef* def );
 MaterialDef* get_equivalent_material( MaterialDef* def );
 MaterialParamType get_material_type_from_usage( MaterialParamUsage usage );

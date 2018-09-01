@@ -194,36 +194,11 @@ Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
 
     setup_resource( shader, source_file, shader_name );
     shader->program           = shader_program;
-    shader->exported_material = make_material_definition( shader->program, params_block );
-    shader->material          = get_equivalent_material( shader->exported_material );
+    shader->material          = make_material_definition( shader->program, params_block );
 
     assert(shader->material != nullptr, "Error: material must be initialized at this point !");
 
     return shader;
-}
-
-MaterialDef* get_equivalent_material( MaterialDef* def )
-{
-    return def->equivalent != nullptr ? def->equivalent : def;
-}
-
-MaterialDef* find_equivalent_material( const MaterialDef* def )
-{
-    auto& material_pool = get_dll_appdata().global_store.material_pool;
-    for( auto it = material_pool.begin(); it != material_pool.end(); ++it )
-    {
-        if( def == *it )
-            continue;
-        if( are_material_equivalent( def, *it ) )
-        {
-            if( it->equivalent != nullptr )
-                return it->equivalent;
-            else
-                return *it;
-        }
-    }
-
-    return nullptr;
 }
 
 MaterialParam make_material_param( const char* name, uint location,
@@ -370,35 +345,5 @@ MaterialDef* make_material_definition( uint program, const std::string& params )
         params_ptr++;
     }
 
-    MaterialDef* equivalent_material = find_equivalent_material( def );
-    def->equivalent = equivalent_material;
-
     return def;
-}
-
-bool are_material_equivalent( const MaterialDef* def1, const MaterialDef* def2 )
-{
-    if( ( def1 == nullptr || def2 == nullptr ) || ( def1->params.size() != def2->params.size() ) )
-        return false;
-
-    bool equivalent = true;
-    int param_idx = 0;
-    for( uint param1 = 0; param1 < def1->params.size(); ++param1 )
-    {
-        bool paramFound = false;
-        for( uint param2 = 0; param2 < def2->params.size(); ++param2 )
-        {
-            if( def1->params[param1].type == def2->params[param2].type 
-                && def1->params[param1].location == def2->params[param2].location )
-                {
-                    paramFound = true;
-                    break;
-                }
-        }
-
-        if( !paramFound )
-            return false;
-    }
-
-    return true;
 }
