@@ -22,6 +22,7 @@ void immediate_set_projection_matrix( const Matrix4& p );
 void immediate_set_texture( const Texture* texture );
 void immediate_set_draw_type    ( uint type );
 void immediate_set_depth        ( float depth );
+void immediate_set_material     ( const Material* material );
 
 void immediate_set_custom_param_value( const char* param_name, Variant value );
 

@@ -54,16 +54,25 @@ struct Shader : public Resource
 {
     GENERATE_BODY( Shader );
 
-    uint program = 0;
+uint program = 0;
     std::vector<ShaderParam> params;
+};
+
+struct MaterialParam
+{
+    const char* name = nullptr;
+    uint location = 0;
+    ShaderParamType type = ShaderParamType::UNKNOWN;
+    Variant value;
 };
 
 struct Material
 {
     Shader* shader;
-    std::vector<Variant> param_instances;
+    std::vector<MaterialParam> param_instances;
 };
 
+Material* create_material( MemoryPool<Material>& material_pool, Shader* shader );
 
 char* extract_shader_name( const char* file, char* buffer, uint buffer_length );
 Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file );

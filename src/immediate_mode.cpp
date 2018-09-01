@@ -53,6 +53,7 @@ struct ImmediateContext
     const Shader* shader = nullptr;
     std::array<ShaderParamValue, 8> custom_param_values;
 
+    const Material* material = nullptr;
     const Texture* texture = nullptr;
 };
 
@@ -92,6 +93,7 @@ void immediate_clear()
     immediate_context.index_count  = 0;
     immediate_set_shader( *immediate_shader );
     immediate_set_texture( nullptr );
+    immediate_set_material( nullptr );
     immediate_context.world_matrix = Matrix4::Identity();
     immediate_context.draw_type = GL_TRIANGLES;
 
@@ -134,51 +136,48 @@ void immediate_set_depth( float depth )
     immediate_context.depth = depth;
 }
 
+void immediate_set_material( const Material* material )
+{
+    immediate_context.material = material;
+}
+
 void immediate_enable_depth_test( bool enabled ) { immediate_context.depth_test = enabled; }
 void immediate_enable_blend( bool enabled ) { immediate_context.alpha_blending = enabled; }
 void immediate_enable_face_cull( bool enabled ) { immediate_context.face_culling = enabled; }
 
 void immediate_set_scissor_window( Vector2 pos, Size size ) { immediate_context.scissor_window = { pos.x, pos.y, size.width, size.height }; immediate_context.scissoring = true; }
 
-void immediate_flush()
+static void immediate_render_using_material( const Material& material )
 {
     auto& context = immediate_context;
-
-    if(context.vertex_count == 0 || context.index_count == 0)
-    {
-        immediate_clear();
-        return;
-    }
-
-    assert(context.shader != nullptr, "Need to set a shader before flushing immediate mode.");
-
-    const Shader& shader = *immediate_context.shader;
+    const auto& shader = *material.shader;
+    
     glUseProgram( shader.program );
 
-    if( immediate_context.depth_test )
+    if( context.depth_test )
         glEnable( GL_DEPTH_TEST );
     else
         glDisable( GL_DEPTH_TEST );
 
-    if( immediate_context.face_culling )
+    if( context.face_culling )
         glEnable( GL_CULL_FACE );
     else
         glDisable( GL_CULL_FACE );
 
-    if( immediate_context.scissoring )
+    if( context.scissoring )
     {
         glEnable( GL_SCISSOR_TEST );
-        glScissor((int)immediate_context.scissor_window.w, 
-                  (int)immediate_context.scissor_window.x, 
-                  (int)immediate_context.scissor_window.y,
-                  (int)immediate_context.scissor_window.z);
+        glScissor((int)context.scissor_window.w, 
+                (int)context.scissor_window.x, 
+                (int)context.scissor_window.y,
+                (int)context.scissor_window.z);
     }
     else
     {
         glDisable( GL_SCISSOR_TEST );
     }
 
-    if( immediate_context.alpha_blending )
+    if( context.alpha_blending )
     {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -203,7 +202,6 @@ void immediate_flush()
         case ShaderParamUsage::PROJECTION:
             glUniformMatrix4fv( param.location, 1, GL_TRUE, context.projection_matrix.m[0] );
             break;
-        
         case ShaderParamUsage::POSITION:
             glBindBuffer( GL_ARRAY_BUFFER, context.vbo_vertices );
             glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(Vector3), 
@@ -219,41 +217,158 @@ void immediate_flush()
             glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.uvws[0]), 
                             context.uvws.data(), GL_DYNAMIC_DRAW );
             break;
-        
         case ShaderParamUsage::CUSTOM:
-            switch( param.type )
-            {
-            case ShaderParamType::TEXTURE2D:
-                for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
-                {
-                    if( immediate_context.custom_param_values[j].param_index == i )
-                    {
-                        glActiveTexture( GL_TEXTURE0 + param.location );
-                        glBindTexture( GL_TEXTURE_2D, (i32)immediate_context.custom_param_values[j].param_value );
-                        glUniform1i( param.location, param.location );
-                        break;
-                    }
-                }
-                break;
-            case ShaderParamType::FLOAT:
-                for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
-                {
-                    if( immediate_context.custom_param_values[j].param_index == i )
-                    {
-                        glUniform1f( param.location, immediate_context.custom_param_values[j].param_value );
-                        break;
-                    }
-                }
-                break;
-            default:
-                assert(false, "Error: Unhandled param type.");
-                break;
-            }
             break;
-
         default:
             assert(false, "Error: Unhandled param usage.");
             break;
+        }
+
+        if( param.usage == ShaderParamUsage::CUSTOM )
+            break;
+    }
+
+    for( int i=0; i<material.param_instances.size(); ++i )
+    {
+        const MaterialParam& param = material.param_instances[i];
+        switch( param.type )
+        {
+            case ShaderParamType::TEXTURE2D:
+                glActiveTexture( GL_TEXTURE0 + param.location );
+                glBindTexture( GL_TEXTURE_2D, (i32)param.value );
+                glUniform1i( param.location, param.location );
+                break;
+            case ShaderParamType::FLOAT:
+                glUniform1f( param.location, (f32)param.value );
+                break;
+            default:
+                assert(false, "Error: Unhandled material custom param type.");
+                break;
+        }
+    }
+}
+
+void immediate_flush()
+{
+    auto& context = immediate_context;
+
+    if(context.vertex_count == 0 || context.index_count == 0)
+    {
+        immediate_clear();
+        return;
+    }
+
+    assert(context.shader != nullptr, "Need to set a shader before flushing immediate mode.");
+
+    if( immediate_context.material )
+    {
+        immediate_render_using_material( *immediate_context.material );
+    }
+    else
+    {
+        const Shader& shader = *immediate_context.shader;
+        glUseProgram( shader.program );
+
+        if( immediate_context.depth_test )
+            glEnable( GL_DEPTH_TEST );
+        else
+            glDisable( GL_DEPTH_TEST );
+
+        if( immediate_context.face_culling )
+            glEnable( GL_CULL_FACE );
+        else
+            glDisable( GL_CULL_FACE );
+
+        if( immediate_context.scissoring )
+        {
+            glEnable( GL_SCISSOR_TEST );
+            glScissor((int)immediate_context.scissor_window.w, 
+                    (int)immediate_context.scissor_window.x, 
+                    (int)immediate_context.scissor_window.y,
+                    (int)immediate_context.scissor_window.z);
+        }
+        else
+        {
+            glDisable( GL_SCISSOR_TEST );
+        }
+
+        if( immediate_context.alpha_blending )
+        {
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable( GL_BLEND );
+        }
+        else
+        {
+            glDisable( GL_BLEND );
+        }
+
+        for( int i=0; i<shader.params.size(); ++i )
+        {
+            const ShaderParam& param = shader.params[i];
+            switch( param.usage )
+            {
+            case ShaderParamUsage::WORLD:
+                glUniformMatrix4fv( param.location, 1, GL_TRUE, context.world_matrix.m[0] );
+                break;
+            case ShaderParamUsage::VIEW:
+                glUniformMatrix4fv( param.location, 1, GL_TRUE, context.view_matrix.m[0] );
+                break;
+            case ShaderParamUsage::PROJECTION:
+                glUniformMatrix4fv( param.location, 1, GL_TRUE, context.projection_matrix.m[0] );
+                break;
+            
+            case ShaderParamUsage::POSITION:
+                glBindBuffer( GL_ARRAY_BUFFER, context.vbo_vertices );
+                glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(Vector3), 
+                                context.vertices.data(), GL_DYNAMIC_DRAW );
+                break;
+            case ShaderParamUsage::COLOR:
+                glBindBuffer( GL_ARRAY_BUFFER, context.vbo_colors );
+                glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.colors[0]), 
+                                context.colors.data(), GL_DYNAMIC_DRAW );
+                break;
+            case ShaderParamUsage::UV:
+                glBindBuffer( GL_ARRAY_BUFFER, context.vbo_uvws );
+                glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.uvws[0]), 
+                                context.uvws.data(), GL_DYNAMIC_DRAW );
+                break;
+            
+            case ShaderParamUsage::CUSTOM:
+                switch( param.type )
+                {
+                case ShaderParamType::TEXTURE2D:
+                    for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
+                    {
+                        if( immediate_context.custom_param_values[j].param_index == i )
+                        {
+                            glActiveTexture( GL_TEXTURE0 + param.location );
+                            glBindTexture( GL_TEXTURE_2D, (i32)immediate_context.custom_param_values[j].param_value );
+                            glUniform1i( param.location, param.location );
+                            break;
+                        }
+                    }
+                    break;
+                case ShaderParamType::FLOAT:
+                    for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
+                    {
+                        if( immediate_context.custom_param_values[j].param_index == i )
+                        {
+                            glUniform1f( param.location, immediate_context.custom_param_values[j].param_value );
+                            break;
+                        }
+                    }
+                    break;
+                default:
+                    assert(false, "Error: Unhandled param type.");
+                    break;
+                }
+                break;
+
+            default:
+                assert(false, "Error: Unhandled param usage.");
+                break;
+            }
         }
     }
 

@@ -327,3 +327,56 @@ Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file )
 
     return shader;
 }
+
+static Variant variant_from_shader_type( ShaderParamType type )
+{
+    switch( type )
+    {
+    case ShaderParamType::FLOAT:
+        return 0.0f;
+    case ShaderParamType::TEXTURE2D:
+        return (i32)-1;
+    default:
+        return Variant();
+    }
+}
+
+static MaterialParam material_param_from_shader_param( ShaderParam& param )
+{
+    return MaterialParam {
+        param.name.c_str(),
+        param.location,
+        param.type,
+        variant_from_shader_type( param.type ),
+    };
+}
+
+Material* create_material( MemoryPool<Material>& material_pool, Shader* shader )
+{
+    assert( shader != nullptr, "Shader must have a value." );
+
+    auto mat = material_pool.Instantiate();
+    mat->shader = shader;
+
+    uint shader_param_size = (uint)shader->params.size();
+    uint custom_param_count = 0;
+    int custom_param_begin = -1;
+    for( uint i = 0; i < shader_param_size; ++i )
+    {
+        if( shader->params[i].usage == ShaderParamUsage::CUSTOM )
+        {
+            custom_param_count = shader_param_size - i;
+            custom_param_begin = i;
+            break;
+        }
+    }
+
+    if( custom_param_count > 0 )
+    {
+        mat->param_instances.resize( custom_param_count );
+        for( uint i = custom_param_begin; i < shader_param_size; ++i )
+            mat->param_instances.emplace_back( material_param_from_shader_param( shader->params[i] ) );
+    }
+
+    return mat;
+}
