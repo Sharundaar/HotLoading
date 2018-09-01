@@ -6,12 +6,15 @@
 #include <string>
 
 #include "basic_types.h"
+#include "variant_type.h"
 #include "basics.h"
 #include "resource.h"
 #include "memory_pool.h"
 
-enum class MaterialParamType : ushort
+enum class ShaderParamType : ushort
 {
+    UNKNOWN,   // unknown type
+
     FLOAT,     // float
     VECTOR2,   // vec2
     VECTOR3,   // vec3
@@ -19,10 +22,12 @@ enum class MaterialParamType : ushort
     MATRIX3,   // mat3
     MATRIX4,   // mat4
     TEXTURE2D, // sampler2d
-};
-const std::string& to_string( MaterialParamType type );
 
-enum class MaterialParamUsage : ushort
+    Count,
+};
+const char* to_string( ShaderParamType type );
+
+enum class ShaderParamUsage : ushort
 {
     CUSTOM,
     WORLD,
@@ -32,20 +37,17 @@ enum class MaterialParamUsage : ushort
     COLOR,
     NORMAL,
     UV,
-};
-const std::string& to_string( MaterialParamUsage usage );
 
-struct MaterialParam
+    Count,
+};
+const char* to_string( ShaderParamUsage usage );
+
+struct ShaderParam
 {
     std::string name;
     uint        location;
-    MaterialParamType  type;
-    MaterialParamUsage usage;
-};
-
-struct MaterialDef
-{
-    std::vector<MaterialParam> params;
+    ShaderParamType  type;
+    ShaderParamUsage usage;
 };
 
 struct Shader : public Resource
@@ -53,13 +55,16 @@ struct Shader : public Resource
     GENERATE_BODY( Shader );
 
     uint program = 0;
+    std::vector<ShaderParam> params;
+};
 
-    MaterialDef* material;
+struct Material
+{
+    Shader* shader;
+    std::vector<Variant> param_instances;
 };
 
 
 char* extract_shader_name( const char* file, char* buffer, uint buffer_length );
 Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file );
-MaterialDef* make_material_definition( uint program, const std::string& params );
-MaterialDef* get_equivalent_material( MaterialDef* def );
-MaterialParamType get_material_type_from_usage( MaterialParamUsage usage );
+ShaderParamType get_shader_param_type_from_usage( ShaderParamUsage usage );

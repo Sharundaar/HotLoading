@@ -12,6 +12,7 @@ bool _assert(bool condition, const std::string& msg = "");
 #define unimplemented() assert( false, "unimplemented" )
 
 #define HAS_FLAG( var, flag ) ((var & flag) == flag )
+#define ARRAY_SIZE( array ) ((sizeof(array) / sizeof(array[0])))
 
 template<typename T>
 void format(std::string& out, const T& val)

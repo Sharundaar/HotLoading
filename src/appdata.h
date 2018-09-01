@@ -56,7 +56,6 @@ struct Metadata
 struct GlobalStore
 {
     MemoryPool<ResourceSource> resource_sources_pool = {};
-    MemoryPool<MaterialDef>    material_pool = {};
     ResourcePool               resource_pool = {};
 };
 

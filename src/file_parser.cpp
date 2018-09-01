@@ -80,6 +80,11 @@ bool is_eof(char c)
     return c == '\0';
 }
 
+bool is_eof_or_nil ( const char* str )
+{
+    return str == nullptr || is_eof( *str );
+}
+
 bool is_empty_space(char c)
 {
     return c == ' ' || c == '\t';

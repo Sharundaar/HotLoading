@@ -22,6 +22,7 @@ struct ResourceFile
 bool is_number     (char c);
 bool is_letter     (char c);
 bool is_eof        (char c);
+bool is_eof_or_nil ( const char* str );
 bool is_empty_space(char c);
 bool is_new_line   (char c);
 

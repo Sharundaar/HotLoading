@@ -189,42 +189,41 @@ void immediate_flush()
         glDisable( GL_BLEND );
     }
 
-    const MaterialDef& def = *shader.material;
-    for( int i=0; i<def.params.size(); ++i )
+    for( int i=0; i<shader.params.size(); ++i )
     {
-        const MaterialParam& param = def.params[i];
+        const ShaderParam& param = shader.params[i];
         switch( param.usage )
         {
-        case MaterialParamUsage::WORLD:
+        case ShaderParamUsage::WORLD:
             glUniformMatrix4fv( param.location, 1, GL_TRUE, context.world_matrix.m[0] );
             break;
-        case MaterialParamUsage::VIEW:
+        case ShaderParamUsage::VIEW:
             glUniformMatrix4fv( param.location, 1, GL_TRUE, context.view_matrix.m[0] );
             break;
-        case MaterialParamUsage::PROJECTION:
+        case ShaderParamUsage::PROJECTION:
             glUniformMatrix4fv( param.location, 1, GL_TRUE, context.projection_matrix.m[0] );
             break;
         
-        case MaterialParamUsage::POSITION:
+        case ShaderParamUsage::POSITION:
             glBindBuffer( GL_ARRAY_BUFFER, context.vbo_vertices );
             glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(Vector3), 
                             context.vertices.data(), GL_DYNAMIC_DRAW );
             break;
-        case MaterialParamUsage::COLOR:
+        case ShaderParamUsage::COLOR:
             glBindBuffer( GL_ARRAY_BUFFER, context.vbo_colors );
             glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.colors[0]), 
                             context.colors.data(), GL_DYNAMIC_DRAW );
             break;
-        case MaterialParamUsage::UV:
+        case ShaderParamUsage::UV:
             glBindBuffer( GL_ARRAY_BUFFER, context.vbo_uvws );
             glBufferData( GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.uvws[0]), 
                             context.uvws.data(), GL_DYNAMIC_DRAW );
             break;
         
-        case MaterialParamUsage::CUSTOM:
+        case ShaderParamUsage::CUSTOM:
             switch( param.type )
             {
-            case MaterialParamType::TEXTURE2D:
+            case ShaderParamType::TEXTURE2D:
                 for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
                 {
                     if( immediate_context.custom_param_values[j].param_index == i )
@@ -236,7 +235,7 @@ void immediate_flush()
                     }
                 }
                 break;
-            case MaterialParamType::FLOAT:
+            case ShaderParamType::FLOAT:
                 for( uint j=0; j<immediate_context.custom_param_values.size(); ++j )
                 {
                     if( immediate_context.custom_param_values[j].param_index == i )
@@ -277,24 +276,23 @@ static void immediate_setup_buffers()
     glBindVertexArray( immediate_context.vao );
     
     const Shader& shader = *immediate_context.shader;
-    const MaterialDef& def = *shader.material;
     
-    for( int i=0; i<def.params.size(); ++i )
+    for( int i=0; i<shader.params.size(); ++i )
     {
-        const MaterialParam& param = def.params[i];
+        const ShaderParam& param = shader.params[i];
         switch( param.usage )
         {
-        case MaterialParamUsage::POSITION:
+        case ShaderParamUsage::POSITION:
             glBindBuffer( GL_ARRAY_BUFFER, immediate_context.vbo_vertices );
             glVertexAttribPointer( param.location, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr );
             glEnableVertexAttribArray( param.location );
             break;
-        case MaterialParamUsage::COLOR:
+        case ShaderParamUsage::COLOR:
             glBindBuffer( GL_ARRAY_BUFFER, immediate_context.vbo_colors );
             glVertexAttribPointer( param.location, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
             glEnableVertexAttribArray( param.location );
             break;
-        case MaterialParamUsage::UV:
+        case ShaderParamUsage::UV:
             glBindBuffer( GL_ARRAY_BUFFER, immediate_context.vbo_uvws );
             glVertexAttribPointer( param.location, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
             glEnableVertexAttribArray( param.location );
@@ -318,10 +316,9 @@ void immediate_set_custom_param_value( const char* param_name, Variant value )
     if( !immediate_context.shader )
         return;
 
-    auto def = immediate_context.shader->material;
-    for( uint i=0; i<def->params.size(); ++i )
+    for( uint i=0; i<immediate_context.shader->params.size(); ++i )
     {
-        if( def->params[i].name == param_name )
+        if( immediate_context.shader->params[i].name == param_name )
         {
             immediate_context.custom_param_values[i] = { i, value };
             break;

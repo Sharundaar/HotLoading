@@ -29,6 +29,6 @@ out vec4 FragColor;
 
 void main()
 {
-    float mipmapLevel = textureQueryLod(Albedo, fragUV).x;
-    FragColor = textureLod( Albedo, fragUV, mipmapLevel );
+    vec2 adjustedUV = floor( fragUV * 16.0 ) / 16.0;
+    FragColor = texture( Albedo, adjustedUV );
 }
