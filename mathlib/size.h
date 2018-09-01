@@ -12,6 +12,7 @@ struct Size
     float height;
 
     float AspectRatio() const;
+    float Area() const;
 };
 
 #ifdef MATHLIB_IMPLEMENTATION
@@ -29,6 +30,11 @@ Size::Size(const Vector2& vec)
 float Size::AspectRatio() const
 {
     return width / height;
+}
+
+float Size::Area() const
+{
+    return width * height;
 }
 
 #endif
