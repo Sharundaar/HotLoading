@@ -54,7 +54,7 @@ struct Shader : public Resource
 {
     GENERATE_BODY( Shader );
 
-uint program = 0;
+    uint program = 0;
     std::vector<ShaderParam> params;
 };
 

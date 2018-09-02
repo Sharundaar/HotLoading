@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "mathlib.h"
 #include "math_helper.h"
+#include "shader.h"
 
 void draw_scalar_inspector( const char* name, const TypeInfo* type, u8* data )
 {
@@ -134,12 +135,41 @@ void draw_scalar_inspector( const char* name, const TypeInfo* type, u8* data )
 
 }
 
+void draw_variant_inspector( const char* name, Variant& variant )
+{
+    switch( variant.type )
+    {
+    case VariantType::NIL:
+        break;
+    case VariantType::i32:
+    {
+        i64 temp = variant.value_i32;
+        if( ImGui::InputScalar( name, ImGuiDataType_S64, &temp ) )
+            variant.value_i32 = (i32) temp;
+        break;
+    }
+    case VariantType::u32:
+    {
+        u64 temp = variant.value_u32;
+        if( ImGui::InputScalar( name, ImGuiDataType_S64, &temp ) )
+            variant.value_u32 = (u32) temp;
+        break;
+    }
+    case VariantType::f32:
+    {
+        ImGui::InputFloat( name, &variant.value_f32, 0.1f, 1.0f, 3 );
+        break;
+    }
+    }
+}
+
 // @Cleanup: This leaks on dll reload...
 static u32 s_string_buffer_capacity;
 static char* s_string_buffer;
-bool draw_data_inspector_override( const char* name,const TypeInfo* type, u8* data )
+bool draw_data_inspector_override( const char* name, const TypeInfo* type, u8* data )
 {
     constexpr TypeId string_id = static_cast<TypeId>( LocalTypeId::std_string_id );
+    constexpr TypeId vector_id = static_cast<TypeId>( LocalTypeId::std_vector_id );
 
     switch( type->type_id )
     {
@@ -211,6 +241,25 @@ bool draw_data_inspector_override( const char* name,const TypeInfo* type, u8* da
             }
             return true;
         }
+        /*case type_id<Material>():
+        {
+
+            return true;
+        }*/
+        case type_id<Material>():
+        {
+            if(ImGui::TreeNode( name ) )
+            {
+                auto material = ((Material*)data);
+                ImGui::LabelText( "Shader name: %s", material->shader->name.c_str() );
+                for( int i=0; i<material->param_instances.size(); ++i )
+                {
+                    draw_variant_inspector( material->param_instances[i].name7, material->param_instances[i].value );
+                }
+                ImGui::TreePop();
+            }
+            return true;
+        }
     }
     return false;
 }
@@ -226,7 +275,7 @@ void draw_struct_inspector( const char* name, const TypeInfo* type, u8* data )
         if( field.type )
         {
             if( (field.modifier & FieldInfoModifier::POINTER) && !(field.modifier & FieldInfoModifier::REFERENCE) )
-				ImGui::Text( "%s* %s", field.type->name, field.name );
+				draw_data_inspector( field.name, field.type, data + field.offset, true );
             else if( !(field.modifier & FieldInfoModifier::POINTER) && (field.modifier & FieldInfoModifier::REFERENCE) )
                 ImGui::Text( "%s& %s", field.type->name, field.name );
             else if( (field.modifier & FieldInfoModifier::POINTER) && (field.modifier & FieldInfoModifier::REFERENCE) )
@@ -259,7 +308,7 @@ void draw_data_inspector( const char* name, const TypeInfo* type, u8* data, bool
         switch( type->type )
         {
             case TypeInfoType::Scalar:
-                draw_scalar_inspector( name, type, data );
+                ( name, type, data );
                 break;
             case TypeInfoType::Struct:
                 if( ImGui::TreeNode( name ) )
