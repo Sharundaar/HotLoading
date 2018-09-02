@@ -55,6 +55,8 @@ struct Metadata
 
 struct GlobalStore
 {
+    MemoryPool<Material>       material_pool = {};
+
     MemoryPool<ResourceSource> resource_sources_pool = {};
     ResourcePool               resource_pool = {};
 };
@@ -73,6 +75,7 @@ struct TestData
     Shader* mix_texture_shader = nullptr;
 
     Entity checkerboard_entity = {};
+    Material* entity_material = nullptr;
 
     float mix_amount = 0.5f;
 

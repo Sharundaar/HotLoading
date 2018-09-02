@@ -73,6 +73,7 @@ struct Material
 };
 
 Material* create_material( MemoryPool<Material>& material_pool, Shader* shader );
+void set_material_param( Material* material, const char* param_name, Variant value );
 
 char* extract_shader_name( const char* file, char* buffer, uint buffer_length );
 Shader* load_shader( MemoryPool<Shader>& shader_pool, const char* source_file );

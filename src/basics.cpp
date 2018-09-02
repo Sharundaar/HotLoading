@@ -83,6 +83,25 @@ template<> void format<unsigned int> (string& out, const unsigned int& val)
     out += move(to_string(val));
 }
 
+template<> void format<VariantType>   (std::string& out, const VariantType& val)
+{
+    switch( val )
+    {
+    case VariantType::f32:
+        out += "f32";
+        break;
+    case VariantType::i32:
+        out += "i32";
+        break;
+    case VariantType::u32:
+        out += "u32";
+        break;
+    case VariantType::NIL:
+        out += "null";
+        break;
+    }
+}
+
 std::string working_directory()
 {
     // @Platform: Windows specific

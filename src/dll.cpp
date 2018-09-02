@@ -236,6 +236,11 @@ void reload_dll()
         appdata.test_data.flower_texture = load_texture( get_resource_pool<Texture>(), "datas/textures/flowers.png" );
         appdata.test_data.texture_shader = load_shader( get_resource_pool<Shader>(), "datas/shaders/transformed_texture.glsl" );
         appdata.test_data.mix_texture_shader = load_shader( get_resource_pool<Shader>(), "datas/shaders/texture_mix_shader.glsl" );
+
+        appdata.test_data.entity_material = create_material( appdata.global_store.material_pool, appdata.test_data.mix_texture_shader );
+        set_material_param( appdata.test_data.entity_material, "Albedo1", appdata.test_data.checkerboard_texture->buffer );
+        set_material_param( appdata.test_data.entity_material, "Albedo2", appdata.test_data.flower_texture->buffer );
+        set_material_param( appdata.test_data.entity_material, "amount", 0.5f );
     }
     else
     {
@@ -422,12 +427,16 @@ void loop_dll( )
 
     immediate_set_world_matrix( Matrix4::RotationTranslation( appdata.test_data.checkerboard_entity.transform.position, appdata.test_data.checkerboard_entity.transform.rotation ) );
 
+#if 0
     immediate_set_shader( *appdata.test_data.mix_texture_shader );
     immediate_set_custom_param_value( "Albedo1", appdata.test_data.checkerboard_texture->buffer );
     immediate_set_custom_param_value( "Albedo2", appdata.test_data.flower_texture->buffer );
     immediate_set_custom_param_value( "amount", appdata.test_data.mix_amount );
+#else
+    immediate_set_material( appdata.test_data.entity_material );
+#endif
 
-    immediate_draw_quad( Vector3{ -1, -1, 0 }, Vector2{ 0, 0 },
+	immediate_draw_quad( Vector3{ -1, -1, 0 }, Vector2{ 0, 0 },
                          Vector3{ -1,  1, 0 }, Vector2{ 0, 1 },
                          Vector3{  1, -1, 0 }, Vector2{ 1, 0 },
                          Vector3{  1,  1, 0 }, Vector2{ 1, 1 } );
@@ -533,7 +542,7 @@ void loop_dll( )
     {
         ImGui::Begin( "Inspector", &appdata.app_state.debug_open, ImGuiWindowFlags_NoCollapse );
             const TypeInfo* appdata_type = appdata.metadata.type_infos[ type_id(appdata) ];
-            draw_data_inspector( "Appdata", appdata_type, reinterpret_cast<u8*>(&appdata) );
+            draw_data_inspector( "Appdata", appdata_type, reinterpret_cast<u8*>(&appdata), false );
         ImGui::End();
     }
 

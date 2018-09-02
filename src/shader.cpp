@@ -335,7 +335,7 @@ static Variant variant_from_shader_type( ShaderParamType type )
     case ShaderParamType::FLOAT:
         return 0.0f;
     case ShaderParamType::TEXTURE2D:
-        return (i32)-1;
+        return (u32)-1;
     default:
         return Variant();
     }
@@ -373,10 +373,25 @@ Material* create_material( MemoryPool<Material>& material_pool, Shader* shader )
 
     if( custom_param_count > 0 )
     {
-        mat->param_instances.resize( custom_param_count );
+        mat->param_instances.reserve( custom_param_count );
         for( uint i = custom_param_begin; i < shader_param_size; ++i )
             mat->param_instances.emplace_back( material_param_from_shader_param( shader->params[i] ) );
     }
 
     return mat;
+}
+
+void set_material_param( Material* material, const char* param_name, Variant value )
+{
+    for( auto& param : material->param_instances )
+    {
+        if( strcmp( param.name, param_name ) == 0 )
+        {
+            if( value.type != param.value.type )
+                println( "Tried to set material param with the wrong variant type, received: %, expected: %.", value.type, param.value.type );
+            else
+                param.value = value;
+            break;
+        }
+    }
 }

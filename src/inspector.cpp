@@ -226,15 +226,13 @@ void draw_struct_inspector( const char* name, const TypeInfo* type, u8* data )
         if( field.type )
         {
             if( (field.modifier & FieldInfoModifier::POINTER) && !(field.modifier & FieldInfoModifier::REFERENCE) )
-                ImGui::Text( "%s* %s", field.type->name, field.name );
+				ImGui::Text( "%s* %s", field.type->name, field.name );
             else if( !(field.modifier & FieldInfoModifier::POINTER) && (field.modifier & FieldInfoModifier::REFERENCE) )
                 ImGui::Text( "%s& %s", field.type->name, field.name );
             else if( (field.modifier & FieldInfoModifier::POINTER) && (field.modifier & FieldInfoModifier::REFERENCE) )
                 ImGui::Text( "%s ambiguous %s", field.type->name, field.name );
             else if( !(field.modifier & FieldInfoModifier::POINTER) && !(field.modifier & FieldInfoModifier::REFERENCE) )
-            {
-                draw_data_inspector( field.name, field.type, data + field.offset );
-            }
+                draw_data_inspector( field.name, field.type, data + field.offset, false );
         }
         else
         {
@@ -243,13 +241,18 @@ void draw_struct_inspector( const char* name, const TypeInfo* type, u8* data )
     }
 }
 
-void draw_data_inspector( const char* name, const TypeInfo* type, u8* data )
+void draw_data_inspector( const char* name, const TypeInfo* type, u8* data, bool is_data_pointer )
 {
     if( !type )
     {
         ImGui::Text( "(unknown) %s", type->name, name );
         return;
     }
+
+	if (is_data_pointer)
+	{
+		data = * ((u8**)data);
+	}
 
     if( !draw_data_inspector_override( name, type, data ) )
     {

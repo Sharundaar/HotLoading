@@ -136,11 +136,6 @@ void immediate_set_depth( float depth )
     immediate_context.depth = depth;
 }
 
-void immediate_set_material( const Material* material )
-{
-    immediate_context.material = material;
-}
-
 void immediate_enable_depth_test( bool enabled ) { immediate_context.depth_test = enabled; }
 void immediate_enable_blend( bool enabled ) { immediate_context.alpha_blending = enabled; }
 void immediate_enable_face_cull( bool enabled ) { immediate_context.face_culling = enabled; }
@@ -149,7 +144,7 @@ void immediate_set_scissor_window( Vector2 pos, Size size ) { immediate_context.
 
 static void immediate_render_using_material( const Material& material )
 {
-    auto& context = immediate_context;
+    const auto& context = immediate_context;
     const auto& shader = *material.shader;
     
     glUseProgram( shader.program );
@@ -258,14 +253,109 @@ void immediate_flush()
         return;
     }
 
-    assert(context.shader != nullptr, "Need to set a shader before flushing immediate mode.");
-
     if( immediate_context.material )
     {
-        immediate_render_using_material( *immediate_context.material );
+		const auto& material = *immediate_context.material;
+		const auto& shader = *material.shader;
+
+		glUseProgram(shader.program);
+
+		if (context.depth_test)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+
+		if (context.face_culling)
+			glEnable(GL_CULL_FACE);
+		else
+			glDisable(GL_CULL_FACE);
+
+		if (context.scissoring)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			glScissor((int)context.scissor_window.w,
+				(int)context.scissor_window.x,
+				(int)context.scissor_window.y,
+				(int)context.scissor_window.z);
+		}
+		else
+		{
+			glDisable(GL_SCISSOR_TEST);
+		}
+
+		if (context.alpha_blending)
+		{
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+		}
+		else
+		{
+			glDisable(GL_BLEND);
+		}
+
+		for (int i = 0; i<shader.params.size(); ++i)
+		{
+			const ShaderParam& param = shader.params[i];
+			switch (param.usage)
+			{
+			case ShaderParamUsage::WORLD:
+				glUniformMatrix4fv(param.location, 1, GL_TRUE, context.world_matrix.m[0]);
+				break;
+			case ShaderParamUsage::VIEW:
+				glUniformMatrix4fv(param.location, 1, GL_TRUE, context.view_matrix.m[0]);
+				break;
+			case ShaderParamUsage::PROJECTION:
+				glUniformMatrix4fv(param.location, 1, GL_TRUE, context.projection_matrix.m[0]);
+				break;
+			case ShaderParamUsage::POSITION:
+				glBindBuffer(GL_ARRAY_BUFFER, context.vbo_vertices);
+				glBufferData(GL_ARRAY_BUFFER, context.vertex_count * sizeof(Vector3),
+					context.vertices.data(), GL_DYNAMIC_DRAW);
+				break;
+			case ShaderParamUsage::COLOR:
+				glBindBuffer(GL_ARRAY_BUFFER, context.vbo_colors);
+				glBufferData(GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.colors[0]),
+					context.colors.data(), GL_DYNAMIC_DRAW);
+				break;
+			case ShaderParamUsage::UV:
+				glBindBuffer(GL_ARRAY_BUFFER, context.vbo_uvws);
+				glBufferData(GL_ARRAY_BUFFER, context.vertex_count * sizeof(context.uvws[0]),
+					context.uvws.data(), GL_DYNAMIC_DRAW);
+				break;
+			case ShaderParamUsage::CUSTOM:
+				break;
+			default:
+				assert(false, "Error: Unhandled param usage.");
+				break;
+			}
+
+			if (param.usage == ShaderParamUsage::CUSTOM)
+				break;
+		}
+
+		for (int i = 0; i<material.param_instances.size(); ++i)
+		{
+			const MaterialParam& param = material.param_instances[i];
+			switch (param.type)
+			{
+			case ShaderParamType::TEXTURE2D:
+				glActiveTexture(GL_TEXTURE0 + param.location);
+				glBindTexture(GL_TEXTURE_2D, (i32) ((u32)param.value));
+				glUniform1i(param.location, param.location);
+				break;
+			case ShaderParamType::FLOAT:
+				glUniform1f(param.location, param.value);
+				break;
+			default:
+				assert(false, "Error: Unhandled material custom param type.");
+				break;
+			}
+		}
     }
     else
     {
+        assert(context.shader != nullptr, "Need to set a shader or a material before flushing immediate mode.");
         const Shader& shader = *immediate_context.shader;
         glUseProgram( shader.program );
 
@@ -385,12 +475,12 @@ void immediate_flush()
 
 static void immediate_setup_buffers()
 {
-    if( immediate_context.shader == nullptr )
+    if( immediate_context.shader == nullptr && immediate_context.material == nullptr )
         return;
 
     glBindVertexArray( immediate_context.vao );
     
-    const Shader& shader = *immediate_context.shader;
+    const Shader& shader = immediate_context.material ? *immediate_context.material->shader : *immediate_context.shader;
     
     for( int i=0; i<shader.params.size(); ++i )
     {
@@ -422,8 +512,18 @@ static void immediate_setup_buffers()
 
 void immediate_set_shader( const Shader& shader )
 {
+	const auto prev_shader = immediate_context.shader;
     immediate_context.shader = &shader;
-    immediate_setup_buffers();
+	if (immediate_context.shader != prev_shader)
+		immediate_setup_buffers();
+}
+
+void immediate_set_material(const Material* material)
+{
+	const auto prev_material = immediate_context.material;
+	immediate_context.material = material;
+	if (prev_material != immediate_context.material)
+		immediate_setup_buffers();
 }
 
 void immediate_set_custom_param_value( const char* param_name, Variant value )

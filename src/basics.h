@@ -2,6 +2,7 @@
 
 #include <string>
 #include "basic_types.h"
+#include "variant_type.h"
 
 #define INVALID_POOL_INDEX 4294967295
 
@@ -30,6 +31,8 @@ template<> void format<long>   (std::string& out, const long& val);
 
 template<> void format<unsigned int>   (std::string& out, const unsigned int  & val);
 template<> void format<unsigned long>  (std::string& out, const unsigned long & val);
+
+template<> void format<VariantType>   (std::string& out, const VariantType& val);
 
 template<typename T>
 const char* format(const char* fmt, std::string& out, const T& val)
