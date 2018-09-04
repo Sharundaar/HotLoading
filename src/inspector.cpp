@@ -254,7 +254,7 @@ bool draw_data_inspector_override( const char* name, const TypeInfo* type, u8* d
                 ImGui::LabelText( "Shader name: %s", material->shader->name.c_str() );
                 for( int i=0; i<material->param_instances.size(); ++i )
                 {
-                    draw_variant_inspector( material->param_instances[i].name7, material->param_instances[i].value );
+                    draw_variant_inspector( material->param_instances[i].name, material->param_instances[i].value );
                 }
                 ImGui::TreePop();
             }
